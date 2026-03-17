@@ -40,3 +40,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# GCP Credentials
+client_secret_855568354793-aak3bu049mjogauurrgoehh4jsf01bjv.apps.googleusercontent.com.json
