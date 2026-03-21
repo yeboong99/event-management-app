@@ -43,3 +43,24 @@ next-env.d.ts
 
 # GCP Credentials
 client_secret_855568354793-aak3bu049mjogauurrgoehh4jsf01bjv.apps.googleusercontent.com.json
+
+# Logs
+logs
+*.log
+dev-debug.log
+# Dependency directories
+node_modules/
+# Environment variables
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+# OS specific
+
+# Task files
+# tasks.json
+# tasks/ 
