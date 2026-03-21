@@ -2,7 +2,7 @@
 argument-hint: [Message]
 description: git 커밋 생성
 allowed-tools: Bash(git *), Read
-model: claude-sonnet-4-5-20250929
+model: claude-sonnet-4-6
 ---
 
 커밋 메시지: $ARGUMENTS
