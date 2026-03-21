@@ -166,11 +166,12 @@
         "testStrategy": "1. 비로그인 상태에서 / 접근 → /auth/login으로 리디렉션\n2. role='admin' 사용자로 / 접근 → /admin으로 리디렉션\n3. role='user' (또는 null) 사용자로 / 접근 → /discover로 리디렉션\n4. profile 없는 사용자 처리 확인 (기본 /discover)\n5. 기존 Supabase 스타터 템플릿 UI 제거 확인",
         "priority": "high",
         "dependencies": ["3", "6"],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
         "complexity": 4,
         "recommendedSubtasks": 3,
-        "expansionPrompt": "app/page.tsx를 역할별 리디렉션 로직으로 전환하는 작업을 세분화하세요. 기존 Supabase 스타터 템플릿 제거(60줄 전체), Server Component로 역할별 리디렉션 로직 구현(비로그인 → /auth/login, admin → /admin, 일반 사용자 → /discover), 리디렉션 동작 검증을 각각의 서브태스크로 구성하세요."
+        "expansionPrompt": "app/page.tsx를 역할별 리디렉션 로직으로 전환하는 작업을 세분화하세요. 기존 Supabase 스타터 템플릿 제거(60줄 전체), Server Component로 역할별 리디렉션 로직 구현(비로그인 → /auth/login, admin → /admin, 일반 사용자 → /discover), 리디렉션 동작 검증을 각각의 서브태스크로 구성하세요.",
+        "updatedAt": "2026-03-21T07:42:55.078Z"
       },
       {
         "id": "8",
@@ -217,9 +218,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-03-21T07:35:48.071Z",
+      "lastModified": "2026-03-21T07:42:55.078Z",
       "taskCount": 10,
-      "completedCount": 6,
+      "completedCount": 7,
       "tags": ["master"]
     }
   }
