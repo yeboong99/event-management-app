@@ -136,11 +136,12 @@
         "testStrategy": "1. types/database.types.ts 파일에 events 테이블 타입 존재 확인\n2. profiles 테이블 타입에 role, name 필드 존재 확인 (full_name 없음)\n3. Enums 타입에 event_category, participation_status, carpool_request_status 존재 확인\n4. `npm run type-check` 통과 (타입 오류 0건)\n5. 기존 코드에서 full_name 참조 제거 완료 확인",
         "priority": "high",
         "dependencies": ["3", "4"],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
         "complexity": 4,
         "recommendedSubtasks": 3,
-        "expansionPrompt": "DB 스키마 변경 반영을 위한 TypeScript 타입 재생성 작업을 세분화하세요. Supabase CLI로 타입 생성 및 파일 덮어쓰기, 기존 코드에서 full_name 참조 검색 및 name으로 변경(components/sign-up-form.tsx 49라인 포함), npm run type-check로 타입 오류 수정을 각각의 서브태스크로 구성하세요."
+        "expansionPrompt": "DB 스키마 변경 반영을 위한 TypeScript 타입 재생성 작업을 세분화하세요. Supabase CLI로 타입 생성 및 파일 덮어쓰기, 기존 코드에서 full_name 참조 검색 및 name으로 변경(components/sign-up-form.tsx 49라인 포함), npm run type-check로 타입 오류 수정을 각각의 서브태스크로 구성하세요.",
+        "updatedAt": "2026-03-21T07:30:41.328Z"
       },
       {
         "id": "6",
@@ -150,11 +151,12 @@
         "testStrategy": "1. admin 역할 사용자 생성: Supabase Dashboard에서 profiles.role='admin' 설정\n2. admin 사용자로 /admin 경로 접근 → 정상 접근 (리디렉션 없음)\n3. 일반 사용자(role='user')로 /admin 접근 → / 경로로 리디렉션\n4. 비인증 사용자로 /admin 접근 → /auth/login으로 리디렉션 (기존 로직 유지)\n5. DB 조회 실패 시나리오 테스트 (profiles 테이블 없는 사용자) → 안전하게 홈 리디렉션\n6. 기존 인증 흐름 영향 없음 확인 (/auth/*, /protected 등)",
         "priority": "high",
         "dependencies": ["3"],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
         "complexity": 5,
         "recommendedSubtasks": 4,
-        "expansionPrompt": "lib/supabase/proxy.ts의 updateSession() 함수에 admin 접근 제어 로직을 추가하는 작업을 세분화하세요. 기존 미들웨어 로직 분석(51-61줄), /admin/* 경로 감지 및 profiles.role 조회 로직 추가, role !== 'admin' 시 홈 리디렉션 구현, 에러 처리 및 기존 인증 흐름 영향 없음 검증을 각각의 서브태스크로 구성하세요."
+        "expansionPrompt": "lib/supabase/proxy.ts의 updateSession() 함수에 admin 접근 제어 로직을 추가하는 작업을 세분화하세요. 기존 미들웨어 로직 분석(51-61줄), /admin/* 경로 감지 및 profiles.role 조회 로직 추가, role !== 'admin' 시 홈 리디렉션 구현, 에러 처리 및 기존 인증 흐름 영향 없음 검증을 각각의 서브태스크로 구성하세요.",
+        "updatedAt": "2026-03-21T07:35:48.071Z"
       },
       {
         "id": "7",
@@ -215,9 +217,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-03-21T07:26:24.967Z",
+      "lastModified": "2026-03-21T07:35:48.071Z",
       "taskCount": 10,
-      "completedCount": 4,
+      "completedCount": 6,
       "tags": ["master"]
     }
   }
