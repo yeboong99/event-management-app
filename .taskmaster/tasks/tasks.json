@@ -106,11 +106,12 @@
         "testStrategy": "1. Supabase Dashboard에서 profiles 테이블 스키마 확인: role 컬럼 존재, name 컬럼 존재 (full_name 제거)\n2. 기존 profiles 데이터의 name 값 보존 확인 (리네이밍으로 데이터 손실 없음)\n3. PostgreSQL에서 ENUM 타입 3개 생성 확인: `SELECT typname FROM pg_type WHERE typtype = 'e';`\n4. 새 프로필 생성 시 role 기본값 'user' 자동 할당 확인\n5. 마이그레이션 rollback 테스트 (선택 사항)",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
         "complexity": 5,
         "recommendedSubtasks": 4,
-        "expansionPrompt": "profiles 테이블 스키마 변경과 ENUM 타입 생성 마이그레이션을 세분화하세요. 3개의 ENUM 타입 생성 SQL 작성, profiles 테이블 컬럼 추가 및 리네이밍 SQL 작성, 마이그레이션 적용 및 검증, 기존 데이터 보존 확인을 각각의 서브태스크로 구성하세요."
+        "expansionPrompt": "profiles 테이블 스키마 변경과 ENUM 타입 생성 마이그레이션을 세분화하세요. 3개의 ENUM 타입 생성 SQL 작성, profiles 테이블 컬럼 추가 및 리네이밍 SQL 작성, 마이그레이션 적용 및 검증, 기존 데이터 보존 확인을 각각의 서브태스크로 구성하세요.",
+        "updatedAt": "2026-03-21T07:26:24.967Z"
       },
       {
         "id": "4",
@@ -120,11 +121,12 @@
         "testStrategy": "1. Supabase Dashboard에서 events 테이블 스키마 확인 (모든 컬럼 존재)\n2. idx_events_host_id 인덱스 존재 확인\n3. updated_at 트리거 동작 확인: 이벤트 업데이트 시 updated_at 자동 갱신\n4. RLS 정책 테스트:\n   - 인증 사용자로 이벤트 생성 (host_id가 자동으로 본인 ID로 설정)\n   - 공개 이벤트는 다른 사용자도 조회 가능\n   - 비공개 이벤트는 주최자만 조회 가능\n   - 주최자가 아닌 사용자는 수정/삭제 불가\n5. ON DELETE CASCADE 동작 확인: 프로필 삭제 시 해당 사용자의 이벤트도 삭제",
         "priority": "high",
         "dependencies": ["3"],
-        "status": "pending",
+        "status": "done",
         "subtasks": [],
         "complexity": 6,
         "recommendedSubtasks": 5,
-        "expansionPrompt": "events 테이블 생성과 RLS 정책 설정 마이그레이션을 세분화하세요. 테이블 CREATE SQL 작성(12개 컬럼 + 외래키), 인덱스 및 updated_at 트리거 생성, RLS 활성화 및 5개 정책 작성(SELECT 공개/비공개, INSERT, UPDATE, DELETE), 마이그레이션 적용, RLS 정책 동작 검증을 각각의 서브태스크로 구성하세요."
+        "expansionPrompt": "events 테이블 생성과 RLS 정책 설정 마이그레이션을 세분화하세요. 테이블 CREATE SQL 작성(12개 컬럼 + 외래키), 인덱스 및 updated_at 트리거 생성, RLS 활성화 및 5개 정책 작성(SELECT 공개/비공개, INSERT, UPDATE, DELETE), 마이그레이션 적용, RLS 정책 동작 검증을 각각의 서브태스크로 구성하세요.",
+        "updatedAt": "2026-03-21T07:25:56.687Z"
       },
       {
         "id": "5",
@@ -213,9 +215,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-03-21T07:13:42.445Z",
+      "lastModified": "2026-03-21T07:26:24.967Z",
       "taskCount": 10,
-      "completedCount": 2,
+      "completedCount": 4,
       "tags": ["master"]
     }
   }
