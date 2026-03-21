@@ -1,0 +1,176 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "TailwindCSS v3에서 v4로 업그레이드",
+        "description": "TailwindCSS v3.4.1을 v4로 업그레이드하고 CSS 파일 기반 설정으로 전환합니다. tailwind.config.ts를 제거하고 globals.css에서 @import 방식으로 변경하며, 기존 shadcn/ui 컴포넌트 스타일 호환성을 확보합니다.",
+        "details": "1. TailwindCSS v4 패키지 설치: `npm install tailwindcss@next @tailwindcss/postcss@next`\n2. postcss.config.mjs 업데이트: `@tailwindcss/postcss` 플러그인으로 교체\n3. tailwind.config.ts의 theme 설정을 globals.css의 CSS 변수 기반으로 마이그레이션\n4. globals.css 상단에 `@import \"tailwindcss\"` 추가, 기존 `@tailwind base/components/utilities` 제거\n5. shadcn/ui CSS 변수(--background, --foreground 등) v4 문법 호환성 검증\n6. 다크 모드 설정 유지 확인\n7. `npm run dev`로 기존 스타일 렌더링 검증\n8. `npm run build`로 빌드 성공 확인\n9. 기존 7개 shadcn/ui 컴포넌트(button, card, badge, checkbox, dropdown-menu, input, label) 수동 렌더링 테스트",
+        "testStrategy": "1. `npm run dev` 실행 시 기존 UI 컴포넌트 스타일 정상 렌더링 확인\n2. 다크 모드 토글 시 테마 변수 정상 적용 확인\n3. `npm run build` 성공 확인\n4. 브라우저 콘솔에 TailwindCSS 관련 에러 없음\n5. auth 페이지들(/auth/login, /auth/sign-up)에서 기존 버튼, 카드, 인풋 스타일 유지 확인",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "TailwindCSS v4 패키지 설치 및 PostCSS 설정 업데이트",
+            "description": "TailwindCSS v4 패키지를 설치하고 postcss.config.mjs를 @tailwindcss/postcss 플러그인으로 교체합니다.",
+            "dependencies": [],
+            "details": "1. `npm install tailwindcss@next @tailwindcss/postcss@next` 실행하여 v4 패키지 설치\n2. postcss.config.mjs 파일 열기\n3. 기존 tailwindcss 플러그인을 @tailwindcss/postcss로 교체:\n```javascript\nexport default {\n  plugins: {\n    '@tailwindcss/postcss': {},\n  },\n};\n```\n4. package.json에서 tailwindcss 버전이 v4로 업데이트되었는지 확인\n5. node_modules 재설치 확인",
+            "status": "pending",
+            "testStrategy": "1. package.json에서 tailwindcss@next 버전 확인\n2. postcss.config.mjs에 @tailwindcss/postcss 플러그인 존재 확인\n3. `npm run dev` 실행하여 에러 없이 서버 시작되는지 확인"
+          },
+          {
+            "id": 2,
+            "title": "tailwind.config.ts의 theme 설정을 globals.css CSS 변수로 마이그레이션",
+            "description": "tailwind.config.ts의 theme 설정을 읽고 globals.css의 CSS 변수 기반 설정으로 변환합니다.",
+            "dependencies": [1],
+            "details": "1. tailwind.config.ts 파일 열기 및 현재 theme 설정 분석\n2. app/globals.css 파일 열기\n3. 기존 `@tailwind base;`, `@tailwind components;`, `@tailwind utilities;` 제거\n4. 파일 상단에 `@import \"tailwindcss\";` 추가\n5. tailwind.config.ts의 theme.extend.colors 설정을 CSS 변수로 변환:\n   - :root와 .dark 셀렉터 내의 CSS 변수 유지 (--background, --foreground 등)\n   - v4 문법 호환성 확인 (hsl() 형식 유지)\n6. tailwind.config.ts의 다른 theme 설정(borderRadius, fontFamily 등)을 CSS 변수 또는 @theme 지시문으로 마이그레이션\n7. tailwind.config.ts 파일 삭제 또는 백업",
+            "status": "pending",
+            "testStrategy": "1. globals.css 상단에 @import \"tailwindcss\" 존재 확인\n2. 기존 @tailwind 지시문 제거 확인\n3. :root와 .dark 셀렉터의 CSS 변수 59개 모두 유지 확인\n4. tailwind.config.ts 파일 삭제 확인\n5. `npm run dev`로 스타일 에러 없이 로드되는지 확인"
+          },
+          {
+            "id": 3,
+            "title": "다크 모드 설정 및 기본 스타일 렌더링 검증",
+            "description": "다크 모드 설정이 v4 환경에서 정상 동작하는지 확인하고 기본 스타일 렌더링을 검증합니다.",
+            "dependencies": [2],
+            "details": "1. `npm run dev` 실행\n2. 브라우저에서 애플리케이션 열기 (http://localhost:3000)\n3. 라이트 모드에서 기본 스타일 확인:\n   - 배경색(--background), 전경색(--foreground) 정상 적용 확인\n   - 텍스트 색상, 버튼 색상 등 기본 UI 요소 렌더링 확인\n4. 다크 모드로 전환 (시스템 설정 또는 토글 버튼)\n5. 다크 모드에서 .dark 셀렉터의 CSS 변수 적용 확인:\n   - --background, --foreground 등의 값이 다크 테마로 변경되는지 확인\n6. 브라우저 개발자 도구 콘솔에서 TailwindCSS 관련 에러 메시지 없는지 확인\n7. Elements 탭에서 CSS 변수 값 inspect하여 올바른 hsl() 값 적용 확인",
+            "status": "pending",
+            "testStrategy": "1. 라이트 모드에서 --background 변수가 hsl(0 0% 100%) 적용 확인\n2. 다크 모드로 전환 시 --background 변수가 hsl(240 10% 3.9%) 적용 확인\n3. 다크 모드 토글 시 즉시 테마 변경되는지 확인\n4. 콘솔에 CSS 관련 에러 없음\n5. 기본 타이포그래피 스타일 정상 렌더링"
+          },
+          {
+            "id": 4,
+            "title": "기존 7개 shadcn/ui 컴포넌트 스타일 호환성 검증",
+            "description": "button, card, badge, checkbox, dropdown-menu, input, label 컴포넌트가 TailwindCSS v4 환경에서 정상적으로 스타일링되는지 검증합니다.",
+            "dependencies": [3],
+            "details": "1. components/ui/ 디렉토리에서 7개 컴포넌트 파일 확인:\n   - button.tsx, card.tsx, badge.tsx, checkbox.tsx, dropdown-menu.tsx, input.tsx, label.tsx\n2. 각 컴포넌트의 className 속성에서 사용하는 Tailwind 클래스 분석\n3. auth 페이지들에서 실제 사용 중인 컴포넌트 렌더링 확인:\n   - /auth/login: Button, Input, Label, Card\n   - /auth/sign-up: Button, Input, Label, Checkbox, Card\n4. 각 컴포넌트의 variant 스타일 확인:\n   - Button: default, destructive, outline, secondary, ghost, link\n   - Badge: default, secondary, destructive, outline\n5. hover, focus, active 상태 스타일 정상 작동 확인\n6. CSS 변수 기반 색상(bg-primary, text-foreground 등) 적용 확인\n7. 다크 모드에서도 모든 variant 스타일 정상 렌더링 확인",
+            "status": "pending",
+            "testStrategy": "1. /auth/login 페이지에서 Button, Input, Label, Card 렌더링 확인\n2. /auth/sign-up 페이지에서 Checkbox, Badge 추가 렌더링 확인\n3. Button의 6가지 variant 모두 스타일 적용 확인\n4. Input focus 시 ring 스타일 표시 확인\n5. dropdown-menu 열기 시 메뉴 스타일 정상 확인\n6. 라이트/다크 모드 전환 시 모든 컴포넌트 색상 정상 변경\n7. hover 효과 정상 작동 (opacity, background 변화)"
+          },
+          {
+            "id": 5,
+            "title": "프로덕션 빌드 성공 및 번들 사이즈 확인",
+            "description": "npm run build 명령으로 프로덕션 빌드가 성공하는지 확인하고 TailwindCSS v4의 번들 사이즈를 검증합니다.",
+            "dependencies": [4],
+            "details": "1. `npm run build` 실행\n2. 빌드 로그에서 에러 메시지 없는지 확인\n3. TailwindCSS 관련 경고 메시지 확인 및 해결:\n   - 미사용 CSS 클래스 경고\n   - CSS 변수 누락 경고\n   - postcss 플러그인 경고\n4. .next/static/css/ 디렉토리의 CSS 파일 사이즈 확인\n5. v3 대비 CSS 번들 사이즈 비교 (v4는 일반적으로 더 작음)\n6. 빌드 완료 후 `npm run start`로 프로덕션 모드 실행\n7. 프로덕션 모드에서 스타일 정상 렌더링 확인\n8. 브라우저 Network 탭에서 CSS 파일 로드 확인",
+            "status": "pending",
+            "testStrategy": "1. `npm run build` 명령 종료 코드 0 (성공)\n2. 빌드 로그에 ERROR 문자열 없음\n3. .next/static/css/ 디렉토리에 CSS 파일 생성 확인\n4. `npm run start` 실행 후 localhost:3000 접속 가능\n5. 프로덕션 모드에서 auth 페이지 스타일 정상 확인\n6. 브라우저 콘솔에 404 에러 없음\n7. CSS 파일 gzip 압축 적용 확인"
+          },
+          {
+            "id": 6,
+            "title": "전체 UI 렌더링 회귀 테스트 및 문서화",
+            "description": "모든 페이지와 컴포넌트의 스타일이 v3와 동일하게 렌더링되는지 최종 검증하고 마이그레이션 내용을 문서화합니다.",
+            "dependencies": [5],
+            "details": "1. 전체 페이지 수동 렌더링 테스트:\n   - / (홈)\n   - /auth/login\n   - /auth/sign-up\n   - /auth/callback\n2. 각 페이지에서 7개 shadcn/ui 컴포넌트 사용 확인\n3. 라이트/다크 모드 전환 반복 테스트 (5회 이상)\n4. 반응형 레이아웃 확인 (375px, 768px, 1280px 뷰포트)\n5. v3 스크린샷과 v4 렌더링 결과 비교 (가능한 경우)\n6. 마이그레이션 문서 작성 (docs/migration/tailwind-v4.md):\n   - 변경 사항 요약 (config 제거, CSS 파일 기반 설정)\n   - 주의사항 (CSS 변수 문법, @import 위치)\n   - 트러블슈팅 가이드\n7. CLAUDE.md 또는 README.md에 TailwindCSS v4 사용 명시",
+            "status": "pending",
+            "testStrategy": "1. 4개 페이지 모두 스타일 깨짐 없이 렌더링\n2. 다크 모드 전환 5회 이상 정상 동작\n3. 모바일(375px)에서 레이아웃 정상 확인\n4. 데스크탑(1280px)에서 레이아웃 정상 확인\n5. docs/migration/tailwind-v4.md 파일 존재\n6. 문서에 postcss.config.mjs, globals.css 변경 사항 명시\n7. `npm run type-check` 성공"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "추가 shadcn/ui 컴포넌트 설치",
+        "description": "후속 Phase에서 필요한 shadcn/ui 컴포넌트를 사전 설치합니다: textarea, select, separator, tabs, avatar, toast, skeleton, dialog, sheet.",
+        "details": "1. TailwindCSS v4 환경 정상 동작 확인 (TASK-001 완료 전제)\n2. `npx shadcn@latest add textarea select separator tabs avatar toast skeleton dialog sheet` 실행\n3. 설치된 각 컴포넌트의 import 테스트:\n   - textarea: 폼 입력에 사용\n   - select: 드롭다운 선택\n   - separator: 구분선\n   - tabs: 탭 UI\n   - avatar: 사용자 프로필 이미지\n   - toast: 알림 메시지\n   - skeleton: 로딩 상태\n   - dialog: 모달\n   - sheet: 사이드 드로어\n4. components/ui/ 디렉토리에 자동 생성된 파일 확인\n5. 각 컴포넌트 간단 렌더링 테스트 (임시 테스트 페이지 또는 Storybook 스타일)\n6. `npm run build` 성공 확인",
+        "testStrategy": "1. components/ui/ 디렉토리에 9개 컴포넌트 파일 존재 확인\n2. 각 컴포넌트 import 가능 확인 (TypeScript 타입 오류 없음)\n3. 간단한 렌더링 테스트 페이지 생성하여 9개 컴포넌트 모두 렌더링\n4. TailwindCSS v4 환경에서 스타일 정상 적용 확인\n5. `npm run build` 성공",
+        "priority": "medium",
+        "dependencies": [1],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 3,
+        "title": "Migration 001: profiles 스키마 정비 + ENUM 타입 생성",
+        "description": "profiles 테이블에 role 컬럼 추가, full_name을 name으로 리네이밍하고, event_category, participation_status, carpool_request_status ENUM 타입을 생성합니다.",
+        "details": "1. Supabase CLI로 새 마이그레이션 파일 생성: `npx supabase migration new profiles_schema_and_enums`\n2. ENUM 타입 생성 SQL:\n   - `CREATE TYPE event_category AS ENUM ('생일파티', '파티모임', '워크샵', '스터디', '운동스포츠', '기타');`\n   - `CREATE TYPE participation_status AS ENUM ('pending', 'approved', 'rejected');`\n   - `CREATE TYPE carpool_request_status AS ENUM ('pending', 'approved', 'rejected');`\n3. profiles 테이블 변경 SQL:\n   - `ALTER TABLE profiles ADD COLUMN role TEXT DEFAULT 'user';`\n   - `ALTER TABLE profiles RENAME COLUMN full_name TO name;`\n4. 기존 데이터 검증: 기존 행의 role 값이 'user'로 설정되는지 확인\n5. 마이그레이션 적용: Supabase Dashboard 또는 CLI로 적용\n6. DB에서 ENUM 타입 및 컬럼 존재 확인",
+        "testStrategy": "1. Supabase Dashboard에서 profiles 테이블 스키마 확인: role 컬럼 존재, name 컬럼 존재 (full_name 제거)\n2. 기존 profiles 데이터의 name 값 보존 확인 (리네이밍으로 데이터 손실 없음)\n3. PostgreSQL에서 ENUM 타입 3개 생성 확인: `SELECT typname FROM pg_type WHERE typtype = 'e';`\n4. 새 프로필 생성 시 role 기본값 'user' 자동 할당 확인\n5. 마이그레이션 rollback 테스트 (선택 사항)",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 4,
+        "title": "Migration 002: events 테이블 생성 + RLS",
+        "description": "이벤트 데이터를 저장할 events 테이블을 생성하고, Row Level Security 정책을 적용합니다.",
+        "details": "1. Supabase CLI로 새 마이그레이션 파일 생성: `npx supabase migration new create_events_table`\n2. events 테이블 CREATE TABLE SQL:\n   - id UUID PRIMARY KEY DEFAULT gen_random_uuid()\n   - host_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL\n   - title TEXT NOT NULL\n   - description TEXT\n   - category event_category NOT NULL\n   - event_date TIMESTAMPTZ NOT NULL\n   - location TEXT\n   - max_participants INTEGER\n   - cover_image_url TEXT\n   - is_public BOOLEAN DEFAULT true\n   - created_at TIMESTAMPTZ DEFAULT now()\n   - updated_at TIMESTAMPTZ DEFAULT now()\n3. 인덱스 생성: `CREATE INDEX idx_events_host_id ON events(host_id);`\n4. updated_at 자동 갱신 트리거:\n   ```sql\n   CREATE OR REPLACE FUNCTION update_updated_at()\n   RETURNS TRIGGER AS $$\n   BEGIN\n     NEW.updated_at = now();\n     RETURN NEW;\n   END;\n   $$ LANGUAGE plpgsql;\n   \n   CREATE TRIGGER events_updated_at\n   BEFORE UPDATE ON events\n   FOR EACH ROW\n   EXECUTE FUNCTION update_updated_at();\n   ```\n5. RLS 활성화: `ALTER TABLE events ENABLE ROW LEVEL SECURITY;`\n6. RLS 정책:\n   - SELECT 공개: `CREATE POLICY \"Public events are viewable by everyone\" ON events FOR SELECT USING (is_public = true);`\n   - SELECT 비공개: `CREATE POLICY \"Host can view their private events\" ON events FOR SELECT USING (auth.uid() = host_id);`\n   - INSERT: `CREATE POLICY \"Authenticated users can create events\" ON events FOR INSERT WITH CHECK (auth.uid() = host_id);`\n   - UPDATE: `CREATE POLICY \"Host can update their events\" ON events FOR UPDATE USING (auth.uid() = host_id);`\n   - DELETE: `CREATE POLICY \"Host can delete their events\" ON events FOR DELETE USING (auth.uid() = host_id);`\n7. 마이그레이션 적용",
+        "testStrategy": "1. Supabase Dashboard에서 events 테이블 스키마 확인 (모든 컬럼 존재)\n2. idx_events_host_id 인덱스 존재 확인\n3. updated_at 트리거 동작 확인: 이벤트 업데이트 시 updated_at 자동 갱신\n4. RLS 정책 테스트:\n   - 인증 사용자로 이벤트 생성 (host_id가 자동으로 본인 ID로 설정)\n   - 공개 이벤트는 다른 사용자도 조회 가능\n   - 비공개 이벤트는 주최자만 조회 가능\n   - 주최자가 아닌 사용자는 수정/삭제 불가\n5. ON DELETE CASCADE 동작 확인: 프로필 삭제 시 해당 사용자의 이벤트도 삭제",
+        "priority": "high",
+        "dependencies": [3],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 5,
+        "title": "TypeScript 타입 재생성",
+        "description": "TASK-003과 TASK-004에서 변경된 DB 스키마를 TypeScript 타입에 반영합니다.",
+        "details": "1. TASK-003, TASK-004 마이그레이션 적용 완료 확인\n2. Supabase CLI로 타입 생성: `npx supabase gen types typescript --project-id <PROJECT_ID> > types/database.types.ts`\n3. 생성된 타입 검증:\n   - profiles 테이블: role, name 필드 존재 (full_name 제거)\n   - events 테이블: 모든 컬럼 타입 반영\n   - Enums: event_category, participation_status, carpool_request_status 타입 존재\n4. 기존 코드에서 full_name 참조 검색: `npx grep -r \"full_name\" app/ components/ lib/`\n5. full_name → name 변경 필요한 코드 수정\n6. `npm run type-check` 실행하여 타입 오류 확인 및 수정\n7. types/database.types.ts 파일에 자동 생성 경고 주석 확인 (직접 수정 금지)",
+        "testStrategy": "1. types/database.types.ts 파일에 events 테이블 타입 존재 확인\n2. profiles 테이블 타입에 role, name 필드 존재 확인 (full_name 없음)\n3. Enums 타입에 event_category, participation_status, carpool_request_status 존재 확인\n4. `npm run type-check` 통과 (타입 오류 0건)\n5. 기존 코드에서 full_name 참조 제거 완료 확인",
+        "priority": "high",
+        "dependencies": [3, 4],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 6,
+        "title": "미들웨어 admin 접근 제어 추가",
+        "description": "lib/supabase/proxy.ts의 updateSession() 함수에 /admin/* 경로에 대한 role 기반 접근 제어 로직을 추가합니다.",
+        "details": "1. lib/supabase/proxy.ts 파일 확인 (현재 51-61줄: 비인증 사용자 리디렉션 로직)\n2. /admin/* 경로 감지 로직 추가 (user 존재 확인 후):\n   ```typescript\n   // /admin/* 경로 접근 제어\n   if (user && request.nextUrl.pathname.startsWith('/admin')) {\n     const { data: profile } = await supabase\n       .from('profiles')\n       .select('role')\n       .eq('id', user.sub)\n       .single();\n     \n     if (profile?.role !== 'admin') {\n       const url = request.nextUrl.clone();\n       url.pathname = '/';\n       return NextResponse.redirect(url);\n     }\n   }\n   ```\n3. 에러 처리: DB 조회 실패 시 안전하게 홈으로 리디렉션\n4. 기존 세션 갱신 로직과 충돌 방지 (supabaseResponse 유지)\n5. 테스트: admin 계정 생성 후 role='admin' 설정, /admin 접근 → 통과\n6. 테스트: 일반 사용자로 /admin 접근 → 홈 리디렉션",
+        "testStrategy": "1. admin 역할 사용자 생성: Supabase Dashboard에서 profiles.role='admin' 설정\n2. admin 사용자로 /admin 경로 접근 → 정상 접근 (리디렉션 없음)\n3. 일반 사용자(role='user')로 /admin 접근 → / 경로로 리디렉션\n4. 비인증 사용자로 /admin 접근 → /auth/login으로 리디렉션 (기존 로직 유지)\n5. DB 조회 실패 시나리오 테스트 (profiles 테이블 없는 사용자) → 안전하게 홈 리디렉션\n6. 기존 인증 흐름 영향 없음 확인 (/auth/*, /protected 등)",
+        "priority": "high",
+        "dependencies": [3],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 7,
+        "title": "루트 페이지 역할별 리디렉션 구현",
+        "description": "app/page.tsx를 역할별 리디렉션 로직으로 교체합니다. 비로그인 사용자는 /auth/login, admin은 /admin, 일반 사용자는 /discover로 리디렉션합니다.",
+        "details": "1. app/page.tsx 기존 내용 전체 교체 (Supabase 스타터 템플릿 제거)\n2. Server Component로 구현:\n   ```typescript\n   import { redirect } from 'next/navigation';\n   import { createClient } from '@/lib/supabase/server';\n   \n   export default async function Home() {\n     const supabase = await createClient();\n     const { data: { user } } = await supabase.auth.getUser();\n     \n     // 비로그인 사용자\n     if (!user) {\n       redirect('/auth/login');\n     }\n     \n     // 로그인 사용자의 role 조회\n     const { data: profile } = await supabase\n       .from('profiles')\n       .select('role')\n       .eq('id', user.id)\n       .single();\n     \n     // role에 따라 리디렉션\n     if (profile?.role === 'admin') {\n       redirect('/admin');\n     }\n     \n     // 기본: 참여자/주최자는 /discover\n     redirect('/discover');\n   }\n   ```\n3. 불필요한 import 제거 (AuthButton, DeployButton, Hero 등)\n4. 리디렉션 테스트",
+        "testStrategy": "1. 비로그인 상태에서 / 접근 → /auth/login으로 리디렉션\n2. role='admin' 사용자로 / 접근 → /admin으로 리디렉션\n3. role='user' (또는 null) 사용자로 / 접근 → /discover로 리디렉션\n4. profile 없는 사용자 처리 확인 (기본 /discover)\n5. 기존 Supabase 스타터 템플릿 UI 제거 확인",
+        "priority": "high",
+        "dependencies": [3, 6],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "참여자 레이아웃 + 하단 탭 내비게이션 구축",
+        "description": "app/(participant)/ 라우트 그룹과 모바일 하단 탭 내비게이션을 구축합니다. 재사용 가능한 mobile-bottom-nav 컴포넌트를 생성합니다.",
+        "details": "1. 디렉토리 생성: `app/(participant)/`\n2. `app/(participant)/layout.tsx` 작성 (Server Component):\n   - children을 감싸는 레이아웃\n   - MobileHeader와 MobileBottomNav 컴포넌트 포함\n   - 모바일 최적화 구조 (flex column, 하단 탭 fixed)\n3. `components/mobile/mobile-bottom-nav.tsx` 작성 (Client Component, 'use client'):\n   - props로 tabs 배열 받기 (재사용성)\n   - 탭 항목: `{ label: string, href: string, icon: LucideIcon }[]`\n   - usePathname()으로 현재 경로 감지\n   - 활성 탭 하이라이트 (bg-primary, text-primary-foreground)\n   - lucide-react 아이콘 사용\n   - 하단 고정 (fixed bottom-0), safe area 대응\n4. 참여자 탭 항목 정의:\n   ```typescript\n   const participantTabs = [\n     { label: '탐색', href: '/discover', icon: Compass },\n     { label: '참여중', href: '/my-events', icon: Calendar },\n     { label: '카풀', href: '/carpools', icon: Car },\n     { label: '프로필', href: '/profile', icon: User },\n   ];\n   ```\n5. `components/mobile/mobile-header.tsx` 작성:\n   - 상단 헤더 바 (서비스 로고/타이틀)\n   - 간결한 디자인\n6. Placeholder 페이지 생성: `app/(participant)/discover/page.tsx`\n7. cn() 유틸리티 사용, 시맨틱 색상 변수 사용\n8. 모바일 뷰포트(375px)에서 렌더링 테스트",
+        "testStrategy": "1. app/(participant)/ 라우트 그룹 존재 확인\n2. /discover 접근 시 하단 탭 렌더링 (4개 탭 표시)\n3. usePathname()으로 현재 경로의 탭 활성화 (bg-primary 스타일)\n4. 탭 클릭 시 해당 경로로 이동 (라우팅 동작)\n5. 모바일 뷰포트(375px)에서 하단 탭 하단 고정 확인\n6. 상단 헤더 렌더링 확인\n7. `npm run build` 성공",
+        "priority": "medium",
+        "dependencies": [1, 2],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 9,
+        "title": "주최자 레이아웃 + 하단 탭 내비게이션 구축",
+        "description": "app/(host)/ 라우트 그룹을 생성하고, TASK-008의 mobile-bottom-nav 컴포넌트를 재사용하여 주최자 전용 탭 구성을 적용합니다.",
+        "details": "1. 디렉토리 생성: `app/(host)/`\n2. `app/(host)/layout.tsx` 작성 (Server Component):\n   - TASK-008의 MobileBottomNav 재사용\n   - 주최자 탭 항목 전달\n3. 주최자 탭 항목 정의:\n   ```typescript\n   const hostTabs = [\n     { label: '홈', href: '/home', icon: Home },\n     { label: '내이벤트', href: '/events', icon: Calendar },\n     { label: '만들기', href: '/events/new', icon: Plus },\n     { label: '프로필', href: '/profile', icon: User },\n   ];\n   ```\n4. MobileHeader 재사용\n5. Placeholder 페이지 생성: `app/(host)/home/page.tsx`\n6. 모바일 뷰포트 렌더링 테스트",
+        "testStrategy": "1. app/(host)/ 라우트 그룹 존재 확인\n2. /home 접근 시 하단 탭 렌더링 (4개 탭: 홈, 내이벤트, 만들기, 프로필)\n3. 탭 클릭 시 해당 경로로 이동\n4. mobile-bottom-nav 컴포넌트가 참여자/주최자 양쪽에서 재사용됨 확인\n5. 모바일 뷰포트에서 하단 탭 정상 렌더링\n6. 상단 헤더 렌더링 확인",
+        "priority": "medium",
+        "dependencies": [8],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 10,
+        "title": "관리자 레이아웃 구축 (GNB + 사이드바)",
+        "description": "app/admin/ 라우트에 데스크탑 중심 레이아웃을 구축합니다. 좌측 사이드바와 상단 GNB를 포함합니다.",
+        "details": "1. 디렉토리 확인: `app/admin/` (이미 존재 가능)\n2. `app/admin/layout.tsx` 작성 (Server Component):\n   - 좌측 사이드바 + 상단 GNB + main content 영역 구성\n   - 데스크탑 레이아웃 (grid 또는 flex)\n3. `components/admin/admin-sidebar.tsx` 작성 (Client Component, 'use client'):\n   - 메뉴 항목:\n     ```typescript\n     const menuItems = [\n       { label: '대시보드', href: '/admin', icon: LayoutDashboard },\n       { label: '이벤트 관리', href: '/admin/events', icon: Calendar },\n       { label: '사용자 관리', href: '/admin/users', icon: Users },\n     ];\n     ```\n   - usePathname()으로 활성 메뉴 하이라이트\n   - 고정 너비 사이드바 (예: w-64)\n4. `components/admin/admin-header.tsx` 작성:\n   - 상단 GNB (서비스 로고/타이틀)\n   - 관리자 프로필 정보 (Avatar 컴포넌트 사용)\n   - 로그아웃 버튼 (dropdown-menu 사용)\n5. Placeholder 페이지 생성: `app/admin/page.tsx`\n6. 데스크탑(1280px+) 뷰포트 최적화\n7. cn() 유틸리티 사용, 시맨틱 색상 변수 사용",
+        "testStrategy": "1. app/admin/ 라우트 렌더링 확인\n2. 좌측 사이드바에 3개 메뉴 표시 (대시보드, 이벤트 관리, 사용자 관리)\n3. usePathname()으로 현재 경로의 메뉴 활성화\n4. 상단 GNB 렌더링 (서비스 타이틀, 관리자 프로필)\n5. 데스크탑(1280px+)에서 사이드바 + GNB 레이아웃 최적화 확인\n6. 로그아웃 버튼 동작 확인 (dropdown-menu)\n7. `npm run build` 성공",
+        "priority": "medium",
+        "dependencies": [1, 2],
+        "status": "pending",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2026-03-21T06:46:08.196Z",
+      "updated": "2026-03-21T06:46:08.196Z",
+      "description": "Tasks for master context"
+    }
+  }
+}
