@@ -46,7 +46,7 @@ export function SignUpForm({
         email,
         password,
         options: {
-          data: { full_name: fullName },
+          data: { name: fullName },
           emailRedirectTo: `${window.location.origin}/auth/confirm?next=/protected`,
         },
       });

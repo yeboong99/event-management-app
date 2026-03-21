@@ -14,14 +14,68 @@ export type Database = {
   }
   public: {
     Tables: {
+      events: {
+        Row: {
+          category: Database["public"]["Enums"]["event_category"]
+          cover_image_url: string | null
+          created_at: string | null
+          description: string | null
+          event_date: string
+          host_id: string
+          id: string
+          is_public: boolean | null
+          location: string | null
+          max_participants: number | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["event_category"]
+          cover_image_url?: string | null
+          created_at?: string | null
+          description?: string | null
+          event_date: string
+          host_id: string
+          id?: string
+          is_public?: boolean | null
+          location?: string | null
+          max_participants?: number | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["event_category"]
+          cover_image_url?: string | null
+          created_at?: string | null
+          description?: string | null
+          event_date?: string
+          host_id?: string
+          id?: string
+          is_public?: boolean | null
+          location?: string | null
+          max_participants?: number | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_host_id_fkey"
+            columns: ["host_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
           bio: string | null
           created_at: string
           email: string | null
-          full_name: string | null
           id: string
+          name: string | null
+          role: string | null
           updated_at: string | null
           username: string | null
           website: string | null
@@ -31,8 +85,9 @@ export type Database = {
           bio?: string | null
           created_at?: string
           email?: string | null
-          full_name?: string | null
           id: string
+          name?: string | null
+          role?: string | null
           updated_at?: string | null
           username?: string | null
           website?: string | null
@@ -42,8 +97,9 @@ export type Database = {
           bio?: string | null
           created_at?: string
           email?: string | null
-          full_name?: string | null
           id?: string
+          name?: string | null
+          role?: string | null
           updated_at?: string | null
           username?: string | null
           website?: string | null
@@ -58,7 +114,15 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      carpool_request_status: "pending" | "approved" | "rejected"
+      event_category:
+        | "생일파티"
+        | "파티모임"
+        | "워크샵"
+        | "스터디"
+        | "운동스포츠"
+        | "기타"
+      participation_status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -185,6 +249,17 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      carpool_request_status: ["pending", "approved", "rejected"],
+      event_category: [
+        "생일파티",
+        "파티모임",
+        "워크샵",
+        "스터디",
+        "운동스포츠",
+        "기타",
+      ],
+      participation_status: ["pending", "approved", "rejected"],
+    },
   },
 } as const
