@@ -49,64 +49,64 @@
 
 #### Tasks
 
-- [ ] **[TASK-001]** TailwindCSS v3 → v4 업그레이드
+- [x] **[TASK-001]** TailwindCSS v3 → v4 업그레이드
   - 파일: `package.json`, `postcss.config.mjs`, `tailwind.config.ts` (삭제), `app/globals.css`
   - 예상 시간: 3h
   - 의존성: 없음
   - 완료 기준: `npm run dev`에서 기존 스타일이 정상 렌더링됨, `tailwind.config.ts` 삭제 후 CSS 파일 기반 설정으로 전환, shadcn/ui 컴포넌트가 정상 동작
   - 상세: `npm install tailwindcss@next @tailwindcss/postcss@next`, `globals.css` 최상단 `@import "tailwindcss"` 적용, `@tailwind base/components/utilities` 지시어 제거
 
-- [ ] **[TASK-002]** 추가 shadcn/ui 컴포넌트 설치
+- [x] **[TASK-002]** 추가 shadcn/ui 컴포넌트 설치
   - 파일: `components/ui/` (자동 생성)
   - 예상 시간: 1h
   - 의존성: TASK-001
   - 완료 기준: textarea, select, separator, tabs, avatar, toast, skeleton, dialog, sheet 컴포넌트가 `components/ui/`에 추가됨
   - 상세: `npx shadcn@latest add textarea select separator tabs avatar toast skeleton dialog sheet`
 
-- [ ] **[TASK-003]** Migration 001 — profiles 스키마 정비 + ENUM 타입 생성
+- [x] **[TASK-003]** Migration 001 — profiles 스키마 정비 + ENUM 타입 생성
   - 파일: Supabase 마이그레이션 SQL
   - 예상 시간: 3h
   - 의존성: 없음
   - 완료 기준: profiles 테이블에 `role TEXT DEFAULT 'user'` 컬럼 추가, `full_name` → `name` 리네이밍 (또는 `name` alias 추가), `event_category`, `participation_status`, `carpool_request_status` ENUM 타입 생성
   - 주의: 기존 `profiles` 데이터 보존 필요. `full_name` 컬럼 리네이밍 시 기존 데이터 마이그레이션 포함. `role` 컬럼 부재 시 인증 시스템 전체가 동작하지 않음
 
-- [ ] **[TASK-004]** Migration 002 — events 테이블 생성 + RLS
+- [x] **[TASK-004]** Migration 002 — events 테이블 생성 + RLS
   - 파일: Supabase 마이그레이션 SQL
   - 예상 시간: 2h
   - 의존성: TASK-003
   - 완료 기준: events 테이블 생성됨, RLS 정책 적용 (공개 이벤트 조회 / 주최자 CRUD)
 
-- [ ] **[TASK-005]** TypeScript 타입 재생성
+- [x] **[TASK-005]** TypeScript 타입 재생성
   - 파일: `types/database.types.ts`
   - 예상 시간: 30m
   - 의존성: TASK-003, TASK-004
   - 완료 기준: `npx supabase gen types` 실행 후 새 테이블/ENUM이 타입에 반영됨
 
-- [ ] **[TASK-006]** 미들웨어 admin 접근 제어 추가
+- [x] **[TASK-006]** 미들웨어 admin 접근 제어 추가
   - 파일: `lib/supabase/proxy.ts`
   - 예상 시간: 2h
   - 의존성: TASK-003 (role 컬럼 필요)
   - 완료 기준: `/admin/*` 경로 접근 시 DB에서 role을 조회하여 `admin`이 아닌 경우 홈으로 리디렉션, role = 'admin'은 통과
 
-- [ ] **[TASK-007]** 루트 페이지 역할별 리디렉션 구현
+- [x] **[TASK-007]** 루트 페이지 역할별 리디렉션 구현
   - 파일: `app/page.tsx`
   - 예상 시간: 1h
   - 의존성: TASK-003, TASK-006
   - 완료 기준: 비로그인 → `/auth/login`, role = 'admin' → `/admin`, role = 'user' → `/discover`
 
-- [ ] **[TASK-008]** 참여자 레이아웃 + 하단 탭 내비게이션 구축
+- [x] **[TASK-008]** 참여자 레이아웃 + 하단 탭 내비게이션 구축
   - 파일: `app/(participant)/layout.tsx`, `components/mobile/mobile-bottom-nav.tsx`, `components/mobile/mobile-header.tsx`
   - 예상 시간: 3h
   - 의존성: TASK-001, TASK-002
   - 완료 기준: 참여자 라우트 그룹에 하단 탭(탐색/참여중/카풀/프로필) + 상단 바 레이아웃 렌더링, `usePathname`으로 활성 탭 하이라이트
 
-- [ ] **[TASK-009]** 주최자 레이아웃 + 하단 탭 내비게이션 구축
+- [x] **[TASK-009]** 주최자 레이아웃 + 하단 탭 내비게이션 구축
   - 파일: `app/(host)/layout.tsx`
   - 예상 시간: 2h
   - 의존성: TASK-008 (mobile-bottom-nav 재사용)
   - 완료 기준: 주최자 라우트 그룹에 하단 탭(홈/내이벤트/만들기/프로필) + 상단 바 레이아웃 렌더링
 
-- [ ] **[TASK-010]** 관리자 레이아웃 구축 (GNB + 사이드바)
+- [x] **[TASK-010]** 관리자 레이아웃 구축 (GNB + 사이드바)
   - 파일: `app/admin/layout.tsx`, `components/admin/admin-sidebar.tsx`, `components/admin/admin-header.tsx`
   - 예상 시간: 3h
   - 의존성: TASK-001, TASK-002
