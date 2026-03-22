@@ -1,3 +1,9 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "프로필",
+};
+
 export default function ProfilePage() {
   return (
     <div className="p-4">

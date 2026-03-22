@@ -1,8 +1,7 @@
+import { redirect } from "next/navigation";
+
+// (host)/events 경로는 (app)/my-events?tab=hosting으로 통합됩니다.
+// UnifiedBottomNav의 "내 활동" 탭 → "주최 중" 탭에서 확인하세요.
 export default function HostEventsPage() {
-  return (
-    <div className="flex flex-col gap-4 p-4">
-      <h1 className="text-xl font-semibold">내 이벤트</h1>
-      <p className="text-muted-foreground text-sm">준비 중입니다.</p>
-    </div>
-  );
+  redirect("/my-events?tab=hosting");
 }

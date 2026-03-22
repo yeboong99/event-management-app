@@ -1,3 +1,9 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "카풀",
+};
+
 export default function CarpoolsPage() {
   return (
     <div className="p-4">

@@ -1,18 +1,11 @@
-import { ParticipantBottomNav } from "@/components/mobile/mobile-bottom-nav";
-import { MobileHeader } from "@/components/mobile/mobile-header";
+// (participant) 라우트 그룹 레이아웃은 (app) 라우트 그룹으로 통합되었습니다.
+// 이 파일은 더 이상 사용되지 않으며, 삭제 예정입니다.
+// 실제 레이아웃은 app/(app)/layout.tsx를 참조하세요.
 
 export default function ParticipantLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <div className="bg-muted/50 flex min-h-screen justify-center">
-      <div className="bg-background flex h-screen w-full max-w-[430px] flex-col shadow-lg">
-        <MobileHeader />
-        <main className="flex-1 overflow-y-auto">{children}</main>
-        <ParticipantBottomNav />
-      </div>
-    </div>
-  );
+  return <>{children}</>;
 }
