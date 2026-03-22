@@ -99,12 +99,12 @@
         "testStrategy": "동시성 테스트 결과 검증:\n1. 동시 10개 요청 시 정확히 max_participants까지만 승인되는지 확인\n2. 초과 요청의 오류 메시지가 'max_participants_exceeded'인지 확인\n3. 데이터베이스 상태 일관성 확인: 부분 업데이트 없이 원자적으로 처리되는지 확인",
         "priority": "high",
         "dependencies": ["42"],
-        "status": "done",
+        "status": "in-progress",
         "subtasks": [],
         "complexity": 8,
         "recommendedSubtasks": 4,
         "expansionPrompt": "approve_participation 동시성 테스트를 다음 서브태스크로 분할하세요: 1) 테스트 데이터 준비(이벤트 1개, pending 참여자 10명), 2) pgbench 또는 병렬 psql 세션으로 동시 승인 요청 스크립트 작성, 3) max_participants 제한이 정확히 지켜지는지 검증, 4) 초과 요청의 에러 메시지 및 트랜잭션 롤백 확인",
-        "updatedAt": "2026-03-22T07:53:56.864Z"
+        "updatedAt": "2026-03-22T08:15:46.132Z"
       },
       {
         "id": "33",
@@ -375,9 +375,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-03-22T07:53:56.864Z",
+      "lastModified": "2026-03-22T08:15:46.132Z",
       "taskCount": 26,
-      "completedCount": 7,
+      "completedCount": 6,
       "tags": ["master"]
     }
   }
