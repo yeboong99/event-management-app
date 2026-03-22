@@ -67,6 +67,92 @@ export type Database = {
           },
         ]
       }
+      participations: {
+        Row: {
+          attended: boolean | null
+          created_at: string | null
+          event_id: string
+          id: string
+          message: string | null
+          status: Database["public"]["Enums"]["participation_status"]
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          attended?: boolean | null
+          created_at?: string | null
+          event_id: string
+          id?: string
+          message?: string | null
+          status?: Database["public"]["Enums"]["participation_status"]
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          attended?: boolean | null
+          created_at?: string | null
+          event_id?: string
+          id?: string
+          message?: string | null
+          status?: Database["public"]["Enums"]["participation_status"]
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "participations_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "participations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      posts: {
+        Row: {
+          author_id: string
+          content: string
+          created_at: string | null
+          event_id: string
+          id: string
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          author_id: string
+          content: string
+          created_at?: string | null
+          event_id: string
+          id?: string
+          type?: string
+          updated_at?: string | null
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          created_at?: string | null
+          event_id?: string
+          id?: string
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "posts_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
