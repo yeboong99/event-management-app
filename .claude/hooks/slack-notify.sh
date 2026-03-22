@@ -45,14 +45,20 @@ fi
 WEBHOOK_URL=""
 
 if [ "$SOURCE" = "project" ]; then
-  # 프로젝트 스코프: $CWD/.env에서 URL 읽기
-  if [ -n "$CWD" ] && [ -f "$CWD/.env" ]; then
+  # 프로젝트 스코프: .env.local → .env 순서로 URL 읽기
+  if [ -n "$CWD" ] && [ -f "$CWD/.env.local" ]; then
+    WEBHOOK_URL=$(grep -E '^SLACK_WEBHOOK_URL=' "$CWD/.env.local" 2>/dev/null | cut -d'=' -f2- | tr -d '"' | tr -d "'" | xargs)
+  fi
+  if [ -z "$WEBHOOK_URL" ] && [ -n "$CWD" ] && [ -f "$CWD/.env" ]; then
     WEBHOOK_URL=$(grep -E '^SLACK_WEBHOOK_URL=' "$CWD/.env" 2>/dev/null | cut -d'=' -f2- | tr -d '"' | tr -d "'" | xargs)
   fi
 else
-  # 유저 스코프: 프로젝트 .env에 URL이 이미 있으면 skip (프로젝트 훅이 처리)
+  # 유저 스코프: 프로젝트 .env.local 또는 .env에 URL이 이미 있으면 skip (프로젝트 훅이 처리)
   PROJECT_HAS_URL=""
-  if [ -n "$CWD" ] && [ -f "$CWD/.env" ]; then
+  if [ -n "$CWD" ] && [ -f "$CWD/.env.local" ]; then
+    PROJECT_HAS_URL=$(grep -E '^SLACK_WEBHOOK_URL=' "$CWD/.env.local" 2>/dev/null | cut -d'=' -f2- | tr -d '"' | tr -d "'" | xargs)
+  fi
+  if [ -z "$PROJECT_HAS_URL" ] && [ -n "$CWD" ] && [ -f "$CWD/.env" ]; then
     PROJECT_HAS_URL=$(grep -E '^SLACK_WEBHOOK_URL=' "$CWD/.env" 2>/dev/null | cut -d'=' -f2- | tr -d '"' | tr -d "'" | xargs)
   fi
 

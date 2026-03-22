@@ -5,7 +5,10 @@ allowed-tools: Read, Edit, Glob, Grep
 model: claude-sonnet-4-6
 ---
 
+## 커스텀 커맨드 개요
+
 현재 코드베이스와 ROADMAP.md를 비교하여 개발 로드맵 문서인 docs/planning/ROADMAP.md를 업데이트합니다.
+만약 이 커맨드의 argument로 정수가 입력될 경우 해당 phase에 대해서 대응되는 단계들의 완료여부를 판단 후 체크표시를 업데이트합니다.
 
 ## 완료 여부 판단 기준
 

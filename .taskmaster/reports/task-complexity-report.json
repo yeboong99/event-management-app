@@ -1,93 +1,77 @@
 {
   "meta": {
-    "generatedAt": "2026-03-21T09:53:54.943Z",
-    "tasksAnalyzed": 10,
-    "totalTasks": 10,
-    "analysisCount": 10,
+    "generatedAt": "2026-03-22T03:22:55.590Z",
+    "tasksAnalyzed": 8,
+    "totalTasks": 19,
+    "analysisCount": 8,
     "thresholdScore": 5,
     "projectName": "Task Master",
     "usedResearch": false
   },
   "complexityAnalysis": [
     {
-      "taskId": 11,
-      "taskTitle": "이벤트 Zod 스키마 및 공통 타입 정의",
-      "complexityScore": 3,
-      "recommendedSubtasks": 3,
-      "expansionPrompt": "이벤트 Zod 스키마와 TypeScript 타입을 정의하는 작업을 다음 서브태스크로 세분화하세요: (1) lib/validations/event.ts에 Zod 스키마 작성 (eventCreateSchema, eventUpdateSchema), (2) types/event.ts에 공통 타입 정의 (EventCategory, EventFormData, EventWithHost, EVENT_CATEGORIES), (3) Zod 스키마 단위 테스트 실행 및 타입 검증. database.types.ts의 Constants.public.Enums.event_category를 직접 참조하여 타입 안정성을 확보하세요.",
-      "reasoning": "단순한 타입 정의 작업. Database 타입이 이미 존재하고 ENUM 상수도 정의되어 있어 새로운 파일 2개만 생성하면 됨. Zod 검증 로직은 명세서에 상세히 기술되어 있고, 외부 의존성이나 복잡한 비즈니스 로직 없음. 3-4시간 내 완료 가능."
+      "taskId": 22,
+      "taskTitle": "전역 스크롤바 숨김 CSS 적용",
+      "complexityScore": 2,
+      "recommendedSubtasks": 0,
+      "expansionPrompt": "이 작업은 단일 CSS 파일 수정만 필요하므로 subtask 분할이 불필요합니다.",
+      "reasoning": "app/globals.css 파일에 @layer base 블록 내 스크롤바 숨김 CSS 규칙만 추가하면 됩니다. 크로스 브라우저 지원을 위한 표준 CSS 속성들(scrollbar-width, -ms-overflow-style, ::-webkit-scrollbar)만 사용하며, 기존 코드와 충돌 가능성이 없습니다. 단순 스타일 추가 작업으로 5분 내 완료 가능합니다."
     },
     {
-      "taskId": 12,
-      "taskTitle": "Supabase Storage 버킷 설정 및 이미지 업로드 유틸리티",
+      "taskId": 23,
+      "taskTitle": "카테고리 탭 스크롤바 및 테두리 라운딩 수정",
+      "complexityScore": 2,
+      "recommendedSubtasks": 0,
+      "expansionPrompt": "이 작업은 간단한 스타일 조정만 필요하므로 subtask 분할이 불필요합니다.",
+      "reasoning": "코드베이스 분석 결과, app/(app)/discover/page.tsx는 이미 올바른 구조(overflow-x-auto div + inline-flex TabsList)를 가지고 있어 수정 불필요합니다. app/(host)/events/page.tsx는 단순 리다이렉트만 하므로 실제 작업이 필요 없습니다. 프로젝트가 (app) 라우트 그룹으로 통합되어 있어 수정 범위가 매우 제한적입니다. Task 22에서 전역 스크롤바가 숨겨지므로 추가 작업이 거의 불필요합니다."
+    },
+    {
+      "taskId": 24,
+      "taskTitle": "커스텀 404 페이지 생성",
+      "complexityScore": 2,
+      "recommendedSubtasks": 0,
+      "expansionPrompt": "이 작업은 단일 정적 컴포넌트 파일 생성만 필요하므로 subtask 분할이 불필요합니다.",
+      "reasoning": "app/not-found.tsx 파일을 새로 생성하는 작업입니다. Next.js App Router의 표준 컨벤션을 따르는 Server Component로, UI 구성 요소(404 에러 코드, 메시지, 홈 버튼)는 명확합니다. 기존 components/ui/button.tsx와 lucide-react 아이콘을 재사용하며, 복잡한 로직이나 데이터 fetching이 없습니다. metadata 추가만으로 완성되는 단순 작업입니다."
+    },
+    {
+      "taskId": 25,
+      "taskTitle": "앱 메타데이터 및 페이지별 탭 타이틀 설정",
+      "complexityScore": 4,
+      "recommendedSubtasks": 3,
+      "expansionPrompt": "app/layout.tsx의 루트 메타데이터 수정, 정적 페이지들의 metadata export 추가, 동적 페이지들의 generateMetadata 함수 구현으로 나누어 작업하세요. 각 subtask는 (1) 루트 레이아웃 메타데이터 수정 및 한국어 번역, (2) my-events, discover, events/new 등 정적 페이지에 metadata export 추가, (3) events/[eventId]와 events/[eventId]/edit 동적 페이지에 generateMetadata 함수 추가 및 Supabase 조회 로직 구현으로 구성됩니다.",
+      "reasoning": "7개 이상의 파일을 수정해야 합니다: app/layout.tsx(기본 metadata), app/(app)/my-events/page.tsx, app/(app)/discover/page.tsx, app/(app)/events/new/page.tsx(정적 metadata), app/(app)/events/[eventId]/page.tsx, app/(app)/events/[eventId]/edit/page.tsx(generateMetadata 함수). 동적 페이지는 Supabase에서 이벤트 제목을 조회하는 로직이 필요하며, Next.js 16의 params Promise 패턴을 따라야 합니다. 반복 작업이지만 파일 수가 많고 일부는 비동기 데이터 조회가 필요합니다."
+    },
+    {
+      "taskId": 26,
+      "taskTitle": "이벤트 수정 페이지 시간 표시 KST 변환",
+      "complexityScore": 5,
+      "recommendedSubtasks": 3,
+      "expansionPrompt": "lib/utils.ts 또는 별도 파일에 UTC-KST 변환 유틸리티 함수 작성, components/forms/event-form.tsx의 defaultValues 처리 로직 수정, 저장 시 역변환 검증 로직 확인으로 나누어 작업하세요. 각 subtask는 (1) utcToKstDatetimeLocal 및 kstDatetimeLocalToUtc 함수 작성 및 date-fns 활용, (2) EventForm 컴포넌트의 defaultValues에서 eventDate 변환 적용, (3) actions/events.ts의 저장 로직 확인 및 테스트 시나리오 검증으로 구성됩니다.",
+      "reasoning": "시간대 변환은 까다로운 작업입니다. UTC ISO 문자열을 KST(UTC+9) 기준 datetime-local 포맷(YYYY-MM-DDTHH:mm)으로 변환하는 유틸리티 함수를 작성해야 하며, 저장 시 역변환도 필요합니다. components/forms/event-form.tsx는 이미 복잡한 폼 로직을 가지고 있어(319줄) 수정 시 주의가 필요합니다. date-fns 라이브러리를 활용하되 수동 오프셋 계산 로직도 고려해야 합니다. 다양한 시간대(자정, 낮, 밤) 테스트가 필요하며, DB와 UI 간 일관성을 보장해야 합니다."
+    },
+    {
+      "taskId": 27,
+      "taskTitle": "이벤트 상세 페이지 뒤로가기 버튼 추가",
+      "complexityScore": 3,
+      "recommendedSubtasks": 2,
+      "expansionPrompt": "components/shared/back-button.tsx Client Component 생성 및 커버 이미지 오버레이 스타일 구현, app/(app)/events/[eventId]/page.tsx에 BackButton 통합 및 레이아웃 조정으로 나누어 작업하세요. 각 subtask는 (1) useRouter 훅 사용한 뒤로가기 로직, variant 옵션(ghost/overlay), fallbackHref 처리, 접근성(aria-label) 구현, (2) 이벤트 상세 페이지의 커버 이미지 영역에 BackButton 배치 및 z-index 조정으로 구성됩니다.",
+      "reasoning": "새로운 공유 컴포넌트(BackButton)를 생성해야 하며, Client Component로 구현해야 합니다(useRouter 사용). 커버 이미지 오버레이 스타일(반투명 배경, 원형 버튼, z-index 처리)과 일반 ghost 스타일 두 가지 variant를 지원해야 합니다. window.history.length 기반 뒤로가기 가능 여부 판단 로직이 필요합니다. app/(app)/events/[eventId]/page.tsx는 194줄의 Server Component이며, 커버 이미지 영역의 기존 레이아웃을 고려하여 버튼을 배치해야 합니다."
+    },
+    {
+      "taskId": 28,
+      "taskTitle": "이벤트 수정/생성 성공 시 Toast 알림 추가",
       "complexityScore": 5,
       "recommendedSubtasks": 4,
-      "expansionPrompt": "Supabase Storage 이미지 업로드 시스템을 다음 서브태스크로 구현하세요: (1) Supabase 대시보드에서 event-covers 버킷 생성 및 RLS 정책 설정 (SQL 마이그레이션 작성), (2) lib/supabase/storage.ts에 파일 검증 함수와 업로드/삭제 유틸리티 구현 (validateImageFile, uploadEventCoverImage, deleteEventCoverImage, getEventCoverImageUrl), (3) next.config.ts에 Supabase 이미지 도메인 추가, (4) 수동 테스트로 업로드/삭제/에러 케이스 검증.",
-      "reasoning": "중간 복잡도. Supabase Storage API는 잘 문서화되어 있지만, RLS 정책 설정, 파일 검증 로직, 에러 핸들링, Next.js 이미지 도메인 설정 등 여러 레이어를 다뤄야 함. 명세서가 상세하지만 Storage 관련 실제 테스트가 필요하고, 권한 문제나 CORS 이슈가 발생할 수 있음. 5-6시간 소요 예상."
+      "expansionPrompt": "app/layout.tsx에 Toaster 컴포넌트 추가 확인, components/shared/toast-handler.tsx Client Component 생성 및 searchParams 기반 Toast 표시 로직 구현, actions/events.ts의 createEvent/updateEvent에 redirect searchParams 추가, app/(app)/events/[eventId]/page.tsx에 ToastHandler 통합으로 나누어 작업하세요. 각 subtask는 (1) Toaster 컴포넌트가 루트 레이아웃에 있는지 확인하고 없으면 추가, (2) useSearchParams와 useEffect를 사용한 ToastHandler 구현 및 URL 파라미터 제거 로직, (3) Server Actions의 redirect 호출 시 ?created=true 또는 ?updated=true 파라미터 추가, (4) 이벤트 상세 페이지에 ToastHandler 컴포넌트 배치로 구성됩니다.",
+      "reasoning": "4개의 파일을 수정해야 하며, Server Actions와 Client Component 간 협업이 필요합니다. searchParams 기반 방식은 Server Actions의 redirect 후에도 Toast를 표시할 수 있지만, useSearchParams는 Client Component에서만 사용 가능하므로 별도 컴포넌트 분리가 필수입니다. actions/events.ts는 397줄의 복잡한 파일이며, createEvent와 updateEvent의 redirect 호출부를 수정해야 합니다. URL 파라미터 제거 로직(router.replace)을 통해 새로고침 시 Toast 재표시를 방지해야 합니다. 에러 처리는 이미 event-form.tsx에서 구현되어 있어 성공 케이스만 다루면 됩니다."
     },
     {
-      "taskId": 13,
-      "taskTitle": "이벤트 CRUD Server Actions 구현",
-      "complexityScore": 7,
-      "recommendedSubtasks": 6,
-      "expansionPrompt": "이벤트 CRUD Server Actions를 다음 서브태스크로 구현하세요: (1) types/action.ts에 ActionResult 타입 정의, (2) actions/events.ts에 createEvent 함수 구현 (인증, Zod 검증, 이미지 업로드, DB 삽입, revalidatePath), (3) updateEvent 함수 구현 (권한 확인, 이미지 교체 로직, DB 업데이트), (4) deleteEvent 함수 구현 (권한 확인, 이미지 삭제, DB 삭제), (5) 조회 함수 구현 (getEventById, getMyEvents, getPublicEvents), (6) 각 함수별 단위 테스트 및 에러 케이스 검증.",
-      "reasoning": "높은 복잡도. 5개의 Server Actions(create, update, delete, getById, getMyEvents, getPublicEvents)를 구현해야 하며, 각각 인증/권한 확인, Zod 검증, 이미지 처리, DB 트랜잭션, revalidatePath/redirect 등 여러 레이어를 포함. Task 11과 12에 의존하며, FormData 파싱, 커버 이미지 교체 로직, 에러 핸들링이 복잡. 명세서가 상세하지만 실제 구현 시 엣지 케이스가 많고, 디버깅 시간이 필요. 8-10시간 소요."
-    },
-    {
-      "taskId": 14,
-      "taskTitle": "이벤트 폼 컴포넌트 구현",
-      "complexityScore": 6,
-      "recommendedSubtasks": 5,
-      "expansionPrompt": "재사용 가능한 이벤트 폼 컴포넌트를 다음 서브태스크로 구현하세요: (1) components/forms/event-form.tsx에 React Hook Form + Zod 폼 기본 구조 작성, (2) 모든 입력 필드 구현 (제목, 카테고리, 일시, 장소, 최대 참여자, 설명, 커버 이미지, 공개/비공개), (3) 이미지 파일 선택 및 미리보기 기능 구현, (4) 클라이언트 검증 및 에러 메시지 표시, (5) create/edit 모드 모두에서 동작 확인 및 반응형 테스트.",
-      "reasoning": "중상 복잡도. React Hook Form + Zod 통합, 10개 필드(일부 optional), 이미지 미리보기, 클라이언트 검증, create/edit 모드 분기 등 구현해야 할 기능이 많음. shadcn/ui 컴포넌트는 이미 설치되어 있어 UI는 빠르지만, 폼 상태 관리와 이미지 처리 로직이 복잡. Task 11과 13에 의존. 명세서가 매우 상세하여 구현은 명확하지만 테스트 시간 필요. 6-8시간 소요."
-    },
-    {
-      "taskId": 15,
-      "taskTitle": "이벤트 생성 페이지 구현 (주최자)",
-      "complexityScore": 2,
-      "recommendedSubtasks": 2,
-      "expansionPrompt": "이벤트 생성 페이지를 다음 서브태스크로 구현하세요: (1) app/(host)/events/new/page.tsx에 인증 확인 로직 및 EventForm 컴포넌트 렌더링, (2) E2E 시나리오 테스트 (비인증 접근, 폼 제출, 성공 후 리디렉션).",
-      "reasoning": "매우 낮은 복잡도. Task 14의 EventForm 컴포넌트를 mode='create'로 렌더링하는 간단한 Server Component 페이지. 인증 확인 로직은 기존 패턴과 동일하며, 명세서가 완전한 코드를 제공. Task 14 완료 후 30분-1시간 내 구현 가능."
-    },
-    {
-      "taskId": 16,
-      "taskTitle": "이벤트 카드 및 카테고리 배지 컴포넌트 구현",
+      "taskId": 29,
+      "taskTitle": "이벤트 카테고리별 커버 이미지 Placeholder 개선",
       "complexityScore": 4,
-      "recommendedSubtasks": 4,
-      "expansionPrompt": "이벤트 카드 및 카테고리 배지를 다음 서브태스크로 구현하세요: (1) components/mobile/event-category-badge.tsx에 6개 카테고리별 색상 매핑 및 Badge 컴포넌트 구현, (2) components/mobile/event-card-mobile.tsx에 카드 레이아웃, 커버 이미지 처리, NEW 배지 로직 구현, (3) date-fns로 상대적 날짜 표시 및 과거 이벤트 opacity 처리, (4) 라이트/다크 모드 및 반응형 UI 시각적 확인.",
-      "reasoning": "중하 복잡도. 2개의 컴포넌트지만 date-fns 포맷팅, 조건부 렌더링(커버 이미지 유무, NEW 배지, 과거 이벤트), 카테고리별 색상 매핑, 다크 모드 대응 등 UI 로직이 다양. date-fns는 이미 설치되어 있고 명세서가 상세하지만, 시각적 테스트와 반응형 확인이 필요. Task 11 의존. 4-5시간 소요."
-    },
-    {
-      "taskId": 17,
-      "taskTitle": "내 이벤트 목록 페이지 구현 (주최자)",
-      "complexityScore": 4,
-      "recommendedSubtasks": 4,
-      "expansionPrompt": "내 이벤트 목록 페이지를 다음 서브태스크로 구현하세요: (1) app/(host)/events/page.tsx에 인증 확인 및 getMyEvents 호출, (2) 카테고리 필터 탭 구현 (searchParams 기반, Link 사용), (3) 2열 그리드 레이아웃 및 빈 상태 UI, (4) 카테고리 필터링 및 반응형 테스트.",
-      "reasoning": "중하 복잡도. Server Component에서 searchParams 처리, 카테고리 필터링, 2열 그리드, 빈 상태 UI 등 여러 UI 패턴 구현. Task 13(getMyEvents)과 Task 16(EventCardMobile) 의존. 명세서가 완전한 코드를 제공하지만, searchParams await 처리와 카테고리 탭 상태 관리를 신경써야 함. 4-5시간 소요."
-    },
-    {
-      "taskId": 18,
-      "taskTitle": "주최자 홈 페이지 구현",
-      "complexityScore": 3,
       "recommendedSubtasks": 3,
-      "expansionPrompt": "주최자 홈 페이지를 다음 서브태스크로 구현하세요: (1) app/(host)/home/page.tsx에 사용자 프로필 조회 및 최근 이벤트 6개 표시, (2) FAB (Floating Action Button) 구현 및 safe-area-inset 처리, (3) 빈 상태 UI 및 E2E 시나리오 테스트.",
-      "reasoning": "중하 복잡도. Task 17과 유사하지만 더 간단. 프로필 조회, 최근 6개 이벤트 표시, FAB 구현 정도. Task 13(getMyEvents)과 Task 16(EventCardMobile) 의존. FAB의 safe-area-inset 처리가 약간의 CSS 작업 필요. 명세서가 완전한 코드 제공. 3-4시간 소요."
-    },
-    {
-      "taskId": 19,
-      "taskTitle": "이벤트 탐색 페이지 구현 (참여자)",
-      "complexityScore": 3,
-      "recommendedSubtasks": 3,
-      "expansionPrompt": "이벤트 탐색 페이지를 다음 서브태스크로 구현하세요: (1) app/(participant)/discover/page.tsx에 getPublicEvents 호출 및 카테고리 필터 구현, (2) NEW 배지 표시 로직 (showNewBadge prop), (3) 빈 상태 UI 및 반응형 가로 스크롤 탭 테스트.",
-      "reasoning": "중하 복잡도. Task 17과 거의 동일한 구조지만 getPublicEvents 사용. showNewBadge prop만 추가되어 약간 더 간단. Task 13(getPublicEvents)과 Task 16(EventCardMobile) 의존. 명세서가 완전한 코드 제공. 3-4시간 소요."
-    },
-    {
-      "taskId": 20,
-      "taskTitle": "이벤트 상세 페이지 및 수정/삭제 기능 구현 (주최자)",
-      "complexityScore": 8,
-      "recommendedSubtasks": 7,
-      "expansionPrompt": "이벤트 상세 페이지 및 수정/삭제 기능을 다음 서브태스크로 구현하세요: (1) components/shared/confirm-dialog.tsx에 재사용 가능한 확인 다이얼로그 구현, (2) components/shared/copy-link-button.tsx에 클립보드 복사 버튼 구현, (3) app/(host)/events/[eventId]/page.tsx에 이벤트 상세 정보 표시 (커버 이미지, 정보, 설명, 하위 탭 구조), (4) 초대 링크 복사 및 수정/삭제 버튼 통합, (5) app/(host)/events/[eventId]/edit/page.tsx에 수정 페이지 구현 (EventForm mode='edit'), (6) 권한 확인 및 404 처리, (7) E2E 시나리오 테스트 (상세 보기, 링크 복사, 수정, 삭제, 권한 체크).",
-      "reasoning": "높은 복잡도. 4개 파일 생성(confirm-dialog, copy-link-button, 상세 페이지, 수정 페이지), 다양한 기능 통합(클립보드 API, 다이얼로그, 권한 확인, 404 처리, 하위 탭 구조). Task 13(getEventById, deleteEvent)과 Task 14(EventForm) 의존. 명세서가 상세하지만 구현할 컴포넌트가 많고, 권한 로직과 에러 핸들링이 복잡. Dialog, Tabs 등 shadcn/ui 컴포넌트는 이미 설치되어 있지만 통합 작업 필요. 8-10시간 소요."
+      "expansionPrompt": "lib/constants/event-gradients.ts 생성 및 카테고리별 gradient 클래스와 아이콘 매핑 정의, components/mobile/event-card-mobile.tsx 수정 및 카테고리별 gradient/아이콘 적용, app/(app)/events/[eventId]/page.tsx 커버 이미지 영역에 동일 gradient 패턴 적용 및 Tailwind safelist 검토로 나누어 작업하세요. 각 subtask는 (1) EventCategory 타입 기반 CATEGORY_GRADIENTS 및 CATEGORY_ICONS Record 생성(생일파티: pink→purple, 파티모임: orange→yellow 등 6개), (2) event-card-mobile.tsx의 커버 이미지 placeholder 로직 수정 및 CategoryIcon 컴포넌트 렌더링, (3) 이벤트 상세 페이지의 커버 영역에 동일 패턴 적용 및 tailwind.config.ts safelist 추가 검토로 구성됩니다.",
+      "reasoning": "types/event.ts에 이미 EventCategory 타입이 정의되어 있어 타입 안정성은 확보되어 있습니다. 6개 카테고리 각각에 대한 gradient 클래스 매핑과 lucide-react 아이콘 매핑을 Record 타입으로 정의해야 합니다. components/mobile/event-card-mobile.tsx(104줄)와 app/(app)/events/[eventId]/page.tsx(194줄) 두 파일을 수정해야 하며, 일관성 있는 gradient 적용이 중요합니다. Tailwind v4에서 동적 클래스 생성 시 safelist가 필요할 수 있으나, 정적으로 정의된 클래스 문자열을 사용하면 빌드 시 자동 포함됩니다. 시각적 일관성과 다크 모드 대비를 고려한 색상 선택이 필요합니다."
     }
   ]
 }

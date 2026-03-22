@@ -1,0 +1,11 @@
+{
+  "enabledMcpjsonServers": [
+    "supabase",
+    "context7",
+    "playwright",
+    "sequential-thinking",
+    "shadcn",
+    "memory",
+    "taskmaster-ai"
+  ]
+}
