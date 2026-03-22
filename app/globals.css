@@ -100,4 +100,18 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* 전역 스크롤바 숨김 (모바일 앱 UX) */
+  html,
+  body {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+  }
+
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+    width: 0;
+    height: 0;
+  }
 }
