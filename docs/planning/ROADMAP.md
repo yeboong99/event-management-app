@@ -94,17 +94,16 @@
   - 의존성: TASK-003, TASK-006
   - 완료 기준: 비로그인 → `/auth/login`, role = 'admin' → `/admin`, role = 'user' → `/discover`
 
-- [x] **[TASK-008]** 참여자 레이아웃 + 하단 탭 내비게이션 구축
-  - 파일: `app/(participant)/layout.tsx`, `components/mobile/mobile-bottom-nav.tsx`, `components/mobile/mobile-header.tsx`
+- [x] **[TASK-008]** 통합 앱 레이아웃 + 하단 탭 내비게이션 구축
+  - 파일: `app/(app)/layout.tsx`, `components/mobile/unified-bottom-nav.tsx`, `components/mobile/mobile-header.tsx`
   - 예상 시간: 3h
   - 의존성: TASK-001, TASK-002
-  - 완료 기준: 참여자 라우트 그룹에 하단 탭(탐색/참여중/카풀/프로필) + 상단 바 레이아웃 렌더링, `usePathname`으로 활성 탭 하이라이트
+  - 완료 기준: `(app)` 통합 라우트 그룹에 하단 탭(탐색/내활동/만들기/카풀/프로필) + 상단 바 레이아웃 렌더링, `usePathname`으로 활성 탭 하이라이트
+  - **변경 이력:** 초기에는 `(participant)` 라우트 그룹으로 분리 구현했으나, Phase 1 추가 작업에서 `(host)` / `(participant)` 분리 구조를 통합 `(app)` 구조로 전환. 역할 전환 버튼 대신 5탭 통합 네비게이션 채택.
 
-- [x] **[TASK-009]** 주최자 레이아웃 + 하단 탭 내비게이션 구축
-  - 파일: `app/(host)/layout.tsx`
-  - 예상 시간: 2h
-  - 의존성: TASK-008 (mobile-bottom-nav 재사용)
-  - 완료 기준: 주최자 라우트 그룹에 하단 탭(홈/내이벤트/만들기/프로필) + 상단 바 레이아웃 렌더링
+- [x] **[TASK-009]** ~~주최자 레이아웃 + 하단 탭 내비게이션 구축~~ (TASK-008로 통합)
+  - **상태:** TASK-008 통합 레이아웃으로 대체됨
+  - **변경 이력:** 초기에는 `app/(host)/layout.tsx`로 주최자 전용 레이아웃을 별도 구현했으나, Phase 1 추가 작업에서 통합 `(app)` 구조로 일원화. 기존 `(host)` 라우트 그룹의 페이지들은 `(app)` 으로 이동.
 
 - [x] **[TASK-010]** 관리자 레이아웃 구축 (GNB + 사이드바)
   - 파일: `app/admin/layout.tsx`, `components/admin/admin-sidebar.tsx`, `components/admin/admin-header.tsx`
@@ -127,67 +126,69 @@
 
 #### Tasks
 
-- [ ] **[TASK-011]** 이벤트 Zod 스키마 + 공통 타입 정의
+- [x] **[TASK-011]** 이벤트 Zod 스키마 + 공통 타입 정의
   - 파일: `lib/validations/event.ts`, `types/event.ts`
   - 예상 시간: 1h
   - 의존성: TASK-005
   - 완료 기준: 이벤트 생성/수정 폼용 Zod 스키마 정의, 카테고리 ENUM 타입 매핑
 
-- [ ] **[TASK-012]** Supabase Storage 버킷 설정 + 이미지 업로드 유틸리티
+- [x] **[TASK-012]** Supabase Storage 버킷 설정 + 이미지 업로드 유틸리티
   - 파일: `lib/supabase/storage.ts`
   - 예상 시간: 2h
   - 의존성: TASK-005
   - 완료 기준: 커버 이미지 업로드/삭제/URL 반환 함수 구현, Storage RLS 정책 설정
 
-- [ ] **[TASK-013]** Server Actions — 이벤트 CRUD 구현
+- [x] **[TASK-013]** Server Actions — 이벤트 CRUD 구현
   - 파일: `actions/events.ts`
   - 예상 시간: 4h
   - 의존성: TASK-011, TASK-012
   - 완료 기준: `createEvent`, `updateEvent`, `deleteEvent` Server Actions 구현, Zod 서버 검증, `revalidatePath()` 호출, 에러 처리
 
-- [ ] **[TASK-014]** 이벤트 생성 페이지 (주최자)
+- [x] **[TASK-014]** 이벤트 생성 페이지 (주최자)
   - 파일: `app/(host)/events/new/page.tsx`, `components/forms/event-form.tsx`
   - 예상 시간: 4h
   - 의존성: TASK-013, TASK-009
   - 완료 기준: React Hook Form + Zod 이중 검증 폼, 카테고리 Select, 날짜/시간 입력, 커버 이미지 업로드, 공개/비공개 토글 동작, 생성 성공 시 이벤트 상세로 리디렉션
 
-- [ ] **[TASK-015]** 이벤트 상세 페이지 (주최자)
+- [x] **[TASK-015]** 이벤트 상세 페이지 (주최자)
   - 파일: `app/(host)/events/[eventId]/page.tsx`
   - 예상 시간: 3h
   - 의존성: TASK-013
   - 완료 기준: 커버 이미지, 제목, 카테고리, 일시, 장소, 인원, 설명 표시, 하위 탭 내비게이션 구조 (참여자/공지댓글/카풀/정산), 수정/삭제 버튼
 
-- [ ] **[TASK-016]** 이벤트 수정 페이지 (주최자)
+- [x] **[TASK-016]** 이벤트 수정 페이지 (주최자)
   - 파일: `app/(host)/events/[eventId]/edit/page.tsx`
   - 예상 시간: 2h
   - 의존성: TASK-014 (event-form 재사용)
   - 완료 기준: 기존 데이터가 미리 채워진 폼, 수정 저장 시 DB 업데이트 + 이벤트 상세로 리디렉션
 
-- [ ] **[TASK-017]** 이벤트 삭제 기능 + 확인 다이얼로그
+- [x] **[TASK-017]** 이벤트 삭제 기능 + 확인 다이얼로그
   - 파일: `components/shared/confirm-dialog.tsx`, `app/(host)/events/[eventId]/page.tsx` (통합)
   - 예상 시간: 1.5h
   - 의존성: TASK-015
   - 완료 기준: 삭제 버튼 클릭 → 확인 다이얼로그 → 삭제 실행 → 내 이벤트 목록으로 리디렉션
 
-- [ ] **[TASK-018]** 주최자 홈 페이지
+- [x] **[TASK-018]** 주최자 홈 페이지
   - 파일: `app/(host)/home/page.tsx`
   - 예상 시간: 2h
   - 의존성: TASK-013
   - 완료 기준: 내가 만든 이벤트 요약 카드 목록 (최근 순), 빈 상태 UI, FAB(이벤트 만들기 버튼)
+  - **변경 이력:** TASK-008 구조 통합으로 `(host)/home`은 `/discover` 리다이렉트로 대체됨. 주최자 홈 기능은 `app/(app)/my-events/page.tsx`의 주최 중 탭(`HostingView`)에 통합 구현되었으며, `getMyEvents()`로 실제 DB 데이터를 조회하고 `EventCardMobile`로 카드 목록을 렌더링함.
 
-- [ ] **[TASK-019]** 내 이벤트 목록 페이지 (주최자)
+- [x] **[TASK-019]** 내 이벤트 목록 페이지 (주최자)
   - 파일: `app/(host)/events/page.tsx`, `components/mobile/event-card-mobile.tsx`, `components/mobile/event-category-badge.tsx`
   - 예상 시간: 3h
   - 의존성: TASK-013
   - 완료 기준: 내가 만든 이벤트 카드 목록 (2열, 썸네일, 카테고리 배지, 참여 현황), 카테고리 필터 탭, 빈 상태 UI
+  - **변경 이력:** `(host)/events`는 `/my-events?tab=hosting` 리다이렉트로 대체됨. `app/(app)/my-events/page.tsx`의 `HostingView`에 카테고리 필터 탭(URL 기반, `?tab=hosting&category=...`)과 2열 이벤트 카드 그리드를 구현하고, `getMyEvents(category?)` 카테고리 필터 지원을 추가함.
 
-- [ ] **[TASK-020]** 이벤트 탐색 페이지 (참여자)
+- [x] **[TASK-020]** 이벤트 탐색 페이지 (참여자)
   - 파일: `app/(participant)/discover/page.tsx`, `components/mobile/segment-tabs.tsx`
   - 예상 시간: 3h
   - 의존성: TASK-019 (event-card-mobile 재사용), TASK-008
   - 완료 기준: 공개 이벤트 카드 2열 목록, 카테고리 세그먼트 탭 필터 (전체/생일파티/파티모임/워크샵/스터디/운동스포츠/기타), NEW 배지, 빈 상태 UI
 
-- [ ] **[TASK-021]** 초대 링크 복사 기능
+- [x] **[TASK-021]** 초대 링크 복사 기능
   - 파일: `components/shared/copy-link-button.tsx`
   - 예상 시간: 1h
   - 의존성: TASK-015

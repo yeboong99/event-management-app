@@ -144,19 +144,30 @@ project-root/
 
 ```
 app/
-├── (public)/           # URL: / (괄호 부분 미포함)
-│   ├── layout.tsx      # 비인증 전용 레이아웃
-│   └── about/page.tsx  # URL: /about
-├── (protected)/        # URL: / (괄호 부분 미포함)
-│   ├── layout.tsx      # 인증 체크 레이아웃
-│   └── dashboard/page.tsx  # URL: /dashboard
+├── (app)/              # URL: / (괄호 부분 미포함) — 인증된 일반 사용자 영역
+│   ├── layout.tsx      # 통합 레이아웃 (MobileHeader + UnifiedBottomNav)
+│   ├── discover/page.tsx    # URL: /discover
+│   ├── my-events/page.tsx   # URL: /my-events
+│   ├── carpools/page.tsx    # URL: /carpools
+│   ├── profile/page.tsx     # URL: /profile
+│   └── events/
+│       ├── new/page.tsx     # URL: /events/new
+│       └── [eventId]/page.tsx  # URL: /events/{id}
+├── admin/              # URL: /admin — 관리자 전용 (데스크탑)
+│   ├── layout.tsx      # 관리자 레이아웃 (AdminSidebar + AdminHeader)
+│   ├── page.tsx
+│   ├── events/page.tsx
+│   └── users/page.tsx
+├── auth/               # URL: /auth — 인증 플로우
+│   ├── login/page.tsx
+│   └── sign-up/page.tsx
 ```
 
-**활용 사례:**
+**이 프로젝트의 라우트 그룹 활용 사례:**
 
-- 인증/비인증 라우트 분리
-- 서로 다른 레이아웃 적용
-- 관심사별 라우트 조직화
+- `(app)`: 로그인한 일반 사용자(주최자/참여자 통합)의 모든 기능 — 통합 하단 탭 5개(탐색/내활동/만들기/카풀/프로필)
+- `admin`: 관리자 전용 뷰 — 데스크탑 레이아웃(사이드바 + GNB)
+- `auth`: 인증 플로우 — 레이아웃 없음, 독립 페이지
 
 ## 모듈 임포트 순서
 
