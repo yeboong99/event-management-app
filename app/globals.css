@@ -170,7 +170,9 @@
     border-color 0.3s ease,
     fill 0.3s ease,
     stroke 0.3s ease,
-    box-shadow 0.3s ease !important;
+    box-shadow 0.3s ease,
+    transform 0.3s ease-in-out,
+    translate 0.3s ease-in-out !important;
 }
 
 :root {
