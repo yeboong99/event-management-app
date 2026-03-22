@@ -3,10 +3,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { getMyEvents } from "@/actions/events";
+import { CategoryTabsScroll } from "@/components/mobile/category-tabs-scroll";
 import { EventCardMobile } from "@/components/mobile/event-card-mobile";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { EVENT_CATEGORIES, type EventWithHost } from "@/types/event";
+import { type EventWithHost } from "@/types/event";
 
 export const metadata: Metadata = {
   title: "내 이벤트",
@@ -112,45 +113,15 @@ type HostingViewProps = {
 function HostingView({ events, selectedCategory }: HostingViewProps) {
   return (
     <section aria-label="주최 중인 이벤트 목록">
-      {/* 카테고리 필터 탭 — /my-events URL 기반 인라인 구현 */}
-      <div
-        className="mb-4 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        aria-label="카테고리 필터"
-      >
-        <div className="flex gap-2 pb-1">
-          {/* 전체 탭 */}
-          <Link
-            href="/my-events?tab=hosting"
-            className={cn(
-              "inline-flex shrink-0 items-center rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
-              !selectedCategory
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground hover:text-foreground",
-            )}
-          >
-            전체
-          </Link>
-
-          {/* 각 카테고리 탭 */}
-          {EVENT_CATEGORIES.map((cat) => (
-            <Link
-              key={cat}
-              href={`/my-events?tab=hosting&category=${cat}`}
-              className={cn(
-                "inline-flex shrink-0 items-center rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
-                selectedCategory === cat
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:text-foreground",
-              )}
-            >
-              {cat}
-            </Link>
-          ))}
-        </div>
-      </div>
+      {/* 카테고리 필터 탭 — 탐색 페이지와 동일한 UI */}
+      <CategoryTabsScroll
+        selectedCategory={selectedCategory}
+        allHref="/my-events?tab=hosting"
+        categoryHrefBase="/my-events?tab=hosting&category="
+      />
 
       {/* 헤더 영역: 이벤트 수 + 만들기 버튼 */}
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mt-4 mb-4 flex items-center justify-between">
         <p className="text-muted-foreground text-sm">
           총 {events.length}개의 이벤트
         </p>

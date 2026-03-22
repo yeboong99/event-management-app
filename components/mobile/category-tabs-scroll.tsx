@@ -10,10 +10,16 @@ import { EVENT_CATEGORIES, type EventCategory } from "@/types/event";
 interface CategoryTabsScrollProps {
   /** 현재 선택된 카테고리 (undefined이면 "all") */
   selectedCategory?: EventCategory | string;
+  /** 전체 탭 링크 href (기본값: "/discover") */
+  allHref?: string;
+  /** 카테고리 링크 베이스 URL (뒤에 카테고리명이 붙음, 기본값: "/discover?category=") */
+  categoryHrefBase?: string;
 }
 
 export function CategoryTabsScroll({
   selectedCategory,
+  allHref = "/discover",
+  categoryHrefBase = "/discover?category=",
 }: CategoryTabsScrollProps) {
   // 스크롤 컨테이너 참조
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -148,11 +154,11 @@ export function CategoryTabsScroll({
               asChild 패턴을 사용해 TabsTrigger 자체가 Link 역할을 하도록 수정 */}
           <TabsList className="inline-flex h-auto w-max gap-1 p-1">
             <TabsTrigger value="all" asChild>
-              <Link href="/discover">전체</Link>
+              <Link href={allHref}>전체</Link>
             </TabsTrigger>
             {EVENT_CATEGORIES.map((category) => (
               <TabsTrigger key={category} value={category} asChild>
-                <Link href={`/discover?category=${category}`}>{category}</Link>
+                <Link href={`${categoryHrefBase}${category}`}>{category}</Link>
               </TabsTrigger>
             ))}
           </TabsList>
