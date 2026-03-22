@@ -16,6 +16,11 @@
 - **폼 처리**: `docs/guides/forms-react-hook-form.md` - React Hook Form + Zod + Server Actions 폼 패턴
 - **스타일링**: `docs/guides/styling-guide.md` - TailwindCSS + shadcn/ui 스타일링 규칙, 다크 모드, 반응형
 
+## 개발 PRD 및 로드맵 참조 위치
+
+- **PRD 문서 위치**: `docs/planning/PRD.md`
+- **개발 로드맵 문서 위치**: `docs/planning/ROADMAP.md`
+
 ## 기술 스택
 
 - Next.js 16 (App Router) + React 19
@@ -52,6 +57,14 @@
 - `cn()` 유틸리티(`lib/utils.ts`): Tailwind 클래스 결합 시 항상 사용
 - 시맨틱 색상 사용 (`bg-primary`, `text-destructive` 등)
 - `@/` 절대 경로 별칭 사용
+
+## 자주 사용하는 서브에이전트
+
+plan 모드로 작업 계획을 세울 때 작업에서 구현 사항이 있다면 각 구현 분야에 대하여 아래 서브에이전트를 적극적으로 활용하세요.
+만약 해당 서브에이전트가 존재하지 않을 경우 보고합니다.
+
+- 일반적인 nextjs + supabase 관련 개발 구현: nextjs-supabase-fullstack 서브에이전트
+- ui 관련 개발 구현: nextjs-ui-markup 서브에이전트
 
 ## 자주 사용하는 명령어
 
