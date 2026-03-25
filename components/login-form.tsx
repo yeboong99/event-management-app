@@ -128,15 +128,7 @@ export function LoginForm({
                   />
                 </div>
                 <div className="grid gap-2">
-                  <div className="flex items-center">
-                    <Label htmlFor="password">비밀번호</Label>
-                    <Link
-                      href="/auth/forgot-password"
-                      className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-                    >
-                      비밀번호를 잊으셨나요?
-                    </Link>
-                  </div>
+                  <Label htmlFor="password">비밀번호</Label>
                   <Input
                     id="password"
                     type="password"
@@ -154,6 +146,7 @@ export function LoginForm({
                   {isLoading ? "로그인 중..." : "로그인"}
                 </Button>
               </div>
+              {/* 회원가입 안내 */}
               <div className="mt-4 text-center text-sm">
                 계정이 없으신가요?{" "}
                 <Link
@@ -161,6 +154,17 @@ export function LoginForm({
                   className="underline underline-offset-4"
                 >
                   회원가입
+                </Link>
+              </div>
+              {/* 비밀번호 찾기 — tabIndex=-1로 Tab 탐색에서 제외 */}
+              <div className="mt-2 text-center text-sm">
+                비밀번호를 잊으셨나요?{" "}
+                <Link
+                  href="/auth/forgot-password"
+                  tabIndex={-1}
+                  className="underline underline-offset-4"
+                >
+                  비밀번호 찾기
                 </Link>
               </div>
             </form>
