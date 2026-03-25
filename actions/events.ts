@@ -357,11 +357,9 @@ export async function getEventById(
     .select(
       `
       *,
-      host:profiles!host_id(name, avatar_url),
-      participations(count)
+      host:profiles!host_id(name, avatar_url)
     `,
     )
-    .eq("participations.status", "approved")
     .eq("id", eventId)
     .single();
 
@@ -369,14 +367,16 @@ export async function getEventById(
     return null;
   }
 
-  // participations 필드를 current_participants_count로 변환하여 반환
-  const { participations, ...rest } = data as typeof data & {
-    participations: { count: number }[];
-  };
+  // SECURITY DEFINER RPC로 참여자 수 조회 (RLS 우회, 주최자 +1 포함)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: countData, error: countError } = (await (supabase.rpc as any)(
+    "get_event_participant_count",
+    { p_event_id: eventId },
+  )) as { data: number | null; error: unknown };
 
   return {
-    ...rest,
-    current_participants_count: participations?.[0]?.count ?? 0,
+    ...data,
+    current_participants_count: countError ? 1 : (countData ?? 1),
   } as EventWithHost;
 }
 
@@ -401,11 +401,9 @@ export async function getMyEvents(category?: string): Promise<EventWithHost[]> {
     .select(
       `
       *,
-      host:profiles!host_id(name, avatar_url),
-      participations(count)
+      host:profiles!host_id(name, avatar_url)
     `,
     )
-    .eq("participations.status", "approved")
     .eq("host_id", user.id)
     .order("created_at", { ascending: false });
 
@@ -415,20 +413,32 @@ export async function getMyEvents(category?: string): Promise<EventWithHost[]> {
 
   const { data, error } = await query;
 
-  if (error || !data) {
+  if (error || !data || data.length === 0) {
     return [];
   }
 
-  // participations 필드를 current_participants_count로 변환하여 반환
-  return data.map((item) => {
-    const { participations, ...rest } = item as typeof item & {
-      participations: { count: number }[];
-    };
-    return {
-      ...rest,
-      current_participants_count: participations?.[0]?.count ?? 0,
-    } as EventWithHost;
-  });
+  // 배치 RPC로 N+1 없이 참여자 수 일괄 조회 (SECURITY DEFINER, 주최자 +1 포함)
+  const eventIds = data.map((e) => e.id);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: countsData } = (await (supabase.rpc as any)(
+    "get_events_participant_counts",
+    { p_event_ids: eventIds },
+  )) as { data: { event_id: string; participant_count: number }[] | null };
+
+  const countMap = new Map<string, number>(
+    (countsData ?? []).map(
+      (row: { event_id: string; participant_count: number }) => [
+        row.event_id,
+        row.participant_count,
+      ],
+    ),
+  );
+
+  return data.map((item) => ({
+    ...item,
+    // approved 참여자가 없는 이벤트는 배치 RPC 결과에 row가 없으므로 기본값 1 사용
+    current_participants_count: countMap.get(item.id) ?? 1,
+  })) as EventWithHost[];
 }
 
 /**
@@ -445,11 +455,9 @@ export async function getPublicEvents(
     .select(
       `
       *,
-      host:profiles!host_id(name, avatar_url),
-      participations(count)
+      host:profiles!host_id(name, avatar_url)
     `,
     )
-    .eq("participations.status", "approved")
     .eq("is_public", true)
     .order("created_at", { ascending: false });
 
@@ -459,18 +467,30 @@ export async function getPublicEvents(
 
   const { data, error } = await query;
 
-  if (error || !data) {
+  if (error || !data || data.length === 0) {
     return [];
   }
 
-  // participations 필드를 current_participants_count로 변환하여 반환
-  return data.map((item) => {
-    const { participations, ...rest } = item as typeof item & {
-      participations: { count: number }[];
-    };
-    return {
-      ...rest,
-      current_participants_count: participations?.[0]?.count ?? 0,
-    } as EventWithHost;
-  });
+  // 배치 RPC로 N+1 없이 참여자 수 일괄 조회 (SECURITY DEFINER, 주최자 +1 포함)
+  const eventIds = data.map((e) => e.id);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: countsData } = (await (supabase.rpc as any)(
+    "get_events_participant_counts",
+    { p_event_ids: eventIds },
+  )) as { data: { event_id: string; participant_count: number }[] | null };
+
+  const countMap = new Map<string, number>(
+    (countsData ?? []).map(
+      (row: { event_id: string; participant_count: number }) => [
+        row.event_id,
+        row.participant_count,
+      ],
+    ),
+  );
+
+  return data.map((item) => ({
+    ...item,
+    // approved 참여자가 없는 이벤트는 배치 RPC 결과에 row가 없으므로 기본값 1 사용
+    current_participants_count: countMap.get(item.id) ?? 1,
+  })) as EventWithHost[];
 }
