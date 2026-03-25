@@ -316,46 +316,49 @@
 
 #### Tasks
 
-- [ ] **[TASK-032]** Migration 005 — carpools + carpool_requests 테이블 + RLS + 인덱스
+- [x] **[TASK-032]** Migration 005 — carpools + carpool_requests 테이블 + RLS + 인덱스
   - 파일: Supabase 마이그레이션 SQL
   - 예상 시간: 3h
   - 의존성: TASK-022
   - 완료 기준: carpools, carpool_requests 테이블 생성, `(carpool_id, passenger_id)` UNIQUE 제약, `carpools(event_id)`, `carpool_requests(carpool_id)`, `carpool_requests(passenger_id)` 인덱스, RLS 정책, FK `ON DELETE CASCADE`
 
-- [ ] **[TASK-033]** 카풀 좌석 동시성 제어 RPC 함수
+- [x] **[TASK-033]** 카풀 좌석 동시성 제어 RPC 함수
   - 파일: Supabase 마이그레이션 SQL (PostgreSQL 함수)
   - 예상 시간: 2h
   - 의존성: TASK-032
   - 완료 기준: `approve_carpool_request(p_request_id, p_carpool_id)` RPC 함수 생성, 현재 승인 탑승자 수가 `total_seats` 미만일 때만 승인 처리 (원자적)
 
-- [ ] **[TASK-034]** TypeScript 타입 재생성 (carpools, carpool_requests)
+- [x] **[TASK-034]** TypeScript 타입 재생성 (carpools, carpool_requests)
   - 파일: `types/database.types.ts`
   - 예상 시간: 30m
   - 의존성: TASK-032, TASK-033
 
-- [ ] **[TASK-035]** Server Actions — 카풀 관리 구현
+- [x] **[TASK-035]** Server Actions — 카풀 관리 구현
   - 파일: `actions/carpools.ts`
   - 예상 시간: 4h
   - 의존성: TASK-034
   - 완료 기준: `registerCarpool`, `deleteCarpool`, `requestCarpool`, `approveCarpoolRequest` (RPC 호출), `rejectCarpoolRequest`, `cancelCarpoolRequest` 구현
 
-- [ ] **[TASK-036]** 카풀 관리 페이지 (주최자)
+- [x] **[TASK-036]** 카풀 관리 페이지 (주최자)
   - 파일: `app/(host)/events/[eventId]/carpool/page.tsx`, `components/shared/carpool-card.tsx`, `components/shared/carpool-actions.tsx`, `components/forms/carpool-register-form.tsx`
   - 예상 시간: 4h
   - 의존성: TASK-035
   - 완료 기준: 카풀 카드 목록 (드라이버, 출발지, 좌석 현황), 카풀 등록 폼, 탑승 신청 목록 + 승인/거절 버튼, 카풀 삭제 버튼
+  - 구현 변경: 별도 페이지 대신 `app/(app)/events/[eventId]/page.tsx`의 카풀 탭에 통합 구현. `CarpoolSection` (Server Component)이 데이터를 페칭하고 `CarpoolTabs` (Client Component)에 위임하는 구조로 변경. `isHost=true`일 때 각 카풀 카드에 탑승 신청 목록(CarpoolActions)과 승인/거절 버튼, 카풀 삭제 버튼(CarpoolDeleteButton)이 표시됨. 카풀 등록 폼(CarpoolRegisterForm)은 "카풀 만들기" 토글 버튼으로 열고 닫을 수 있음.
 
-- [ ] **[TASK-037]** 카풀 탑승 신청 페이지 (참여자)
+- [x] **[TASK-037]** 카풀 탑승 신청 페이지 (참여자)
   - 파일: `app/(participant)/events/[eventId]/carpool/page.tsx`, `components/forms/carpool-request-form.tsx`
   - 예상 시간: 3h
   - 의존성: TASK-035
   - 완료 기준: 카풀 카드 목록 (잔여 좌석 표시), 탑승 신청 버튼 (잔여석 있을 때 활성화), 신청 상태 표시, 신청 취소
+  - 구현 변경: 별도 페이지 대신 TASK-036과 동일한 `app/(app)/events/[eventId]/page.tsx` 카풀 탭에 통합. `isApproved=true`이고 드라이버가 아닌 경우 각 카풀 카드에 `CarpoolRequestForm`이 렌더링됨. `approvedCount`로 잔여 좌석 계산 및 버튼 활성화 여부 제어, `existingRequest`로 기신청 상태 표시, "내 카풀" 탭에서 신청 취소 기능 제공.
 
-- [ ] **[TASK-038]** 내가 신청한 카풀 목록 페이지 (참여자)
+- [x] **[TASK-038]** 내가 신청한 카풀 목록 페이지 (참여자)
   - 파일: `app/(participant)/carpools/page.tsx`
   - 예상 시간: 2h
   - 의존성: TASK-035
   - 완료 기준: 내가 탑승 신청한 카풀 카드 목록, 상태별 필터, 신청 취소 (pending), 빈 상태 UI
+  - 구현 변경: 라우트 그룹을 `(participant)` 대신 `(app)`으로 통합하여 `app/(app)/carpools/page.tsx`로 구현 (`/carpools` 경로). "탑승 신청" / "내가 등록한 카풀" 두 탭으로 구성되며 `?tab=driver` 쿼리로 전환. 탑승 신청 탭은 `MyCarpoolRequestsView`(전체/대기/승인/거절 상태 필터 + 신청 취소 + 빈 상태 UI), 드라이버 탭은 `MyCarpoolsDriverView`로 분리 구현.
 
 #### 위험 요소 (Risks)
 

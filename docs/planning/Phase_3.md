@@ -2,7 +2,7 @@
 
 **생성일:** 2026-03-24
 **대상 Phase:** Phase 3
-**상태:** 미착수
+**상태:** 완료
 
 ---
 
@@ -34,15 +34,15 @@
 
 ### 전체 Phase 목록
 
-| Phase       | 제목                                                  | 상태           |
-| ----------- | ----------------------------------------------------- | -------------- |
-| Phase 0     | 기반 설정 (Foundation Setup)                          | 완료           |
-| Phase 1     | 데이터 레이어 + 이벤트 CRUD                           | 완료           |
-| Phase 2     | 참여자 관리 + 공지/댓글 (Participation + Posts)       | 완료           |
-| **Phase 3** | **카풀 기능 (Carpool)**                               | **현재 Phase** |
-| Phase 4     | 정산 + 관리자 대시보드 (Settlement + Admin)           | 미착수         |
-| Phase 5     | 프로필 + 사용자 경험 + 보안 (Profile + UX + Security) | 미착수         |
-| Phase 6     | 성능 최적화 + 런칭 준비 (Performance + Launch)        | 미착수         |
+| Phase       | 제목                                                  | 상태     |
+| ----------- | ----------------------------------------------------- | -------- |
+| Phase 0     | 기반 설정 (Foundation Setup)                          | 완료     |
+| Phase 1     | 데이터 레이어 + 이벤트 CRUD                           | 완료     |
+| Phase 2     | 참여자 관리 + 공지/댓글 (Participation + Posts)       | 완료     |
+| **Phase 3** | **카풀 기능 (Carpool)**                               | **완료** |
+| Phase 4     | 정산 + 관리자 대시보드 (Settlement + Admin)           | 미착수   |
+| Phase 5     | 프로필 + 사용자 경험 + 보안 (Profile + UX + Security) | 미착수   |
+| Phase 6     | 성능 최적화 + 런칭 준비 (Performance + Launch)        | 미착수   |
 
 ### 코딩 컨벤션
 

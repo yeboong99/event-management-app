@@ -25,7 +25,7 @@ project-root/
 │   │   ├── my-events/
 │   │   │   └── page.tsx          # 내 활동 (참여 중 / 주최 중 탭)
 │   │   ├── carpools/
-│   │   │   └── page.tsx          # 카풀 (Phase 3 예정, 현재 placeholder)
+│   │   │   └── page.tsx          # 내 카풀 현황 (드라이버/탑승자)
 │   │   └── profile/
 │   │       └── page.tsx          # 프로필 (Phase 5 예정, 현재 placeholder)
 │   ├── admin/                    # 관리자 전용 라우트 (데스크탑)
@@ -76,7 +76,9 @@ project-root/
 │   ├── forms/                    # 폼 컴포넌트
 │   │   ├── event-form.tsx        # 이벤트 생성/수정 폼
 │   │   ├── participation-form.tsx # 참여 신청 폼
-│   │   └── post-form.tsx         # 게시물 작성 폼
+│   │   ├── post-form.tsx         # 게시물 작성 폼
+│   │   ├── carpool-register-form.tsx # 카풀 등록 폼 (드라이버)
+│   │   └── carpool-request-form.tsx  # 카풀 탑승 신청 폼 (탑승자)
 │   ├── shared/                   # 범용 재사용 컴포넌트
 │   │   ├── access-restricted-notice.tsx  # 접근 제한 안내
 │   │   ├── attendance-toggle.tsx         # 출석 토글 (useOptimistic)
@@ -90,7 +92,16 @@ project-root/
 │   │   ├── post-feed.tsx                 # 페이지네이션 피드
 │   │   ├── post-item.tsx                 # 개별 게시물 (인라인 수정)
 │   │   ├── posts-section.tsx             # 게시판 섹션
-│   │   └── toast-handler.tsx             # URL 쿼리 기반 토스트
+│   │   ├── toast-handler.tsx             # URL 쿼리 기반 토스트
+│   │   ├── carpool-section.tsx           # 카풀 섹션 (이벤트 상세 내)
+│   │   ├── carpool-tabs.tsx              # 카풀 탭 (등록/신청 전환)
+│   │   ├── carpool-card.tsx              # 카풀 카드 UI
+│   │   ├── carpool-actions.tsx           # 카풀 관리 액션 (드라이버)
+│   │   ├── carpool-register-toggle.tsx   # 카풀 등록 토글
+│   │   ├── carpool-request-status.tsx    # 탑승 신청 상태 표시
+│   │   ├── carpool-conflict-dialog.tsx   # 중복 신청 경고 다이얼로그
+│   │   ├── my-carpool-requests-view.tsx  # 내 탑승 신청 목록 뷰
+│   │   └── my-carpools-driver-view.tsx   # 내 카풀 등록 목록 뷰 (드라이버)
 │   ├── mobile/                   # 모바일 전용 컴포넌트
 │   │   ├── mobile-header.tsx
 │   │   ├── unified-bottom-nav.tsx
@@ -121,21 +132,24 @@ project-root/
 │   │   ├── event.ts              # 이벤트 검증 스키마
 │   │   ├── image.ts              # 이미지 검증 유틸
 │   │   ├── participation.ts      # 참여 검증 스키마
-│   │   └── post.ts               # 게시물 검증 스키마
+│   │   ├── post.ts               # 게시물 검증 스키마
+│   │   └── carpool.ts            # 카풀 검증 스키마
 │   └── constants/
 │       └── event-gradients.ts    # 카테고리별 배경 그라데이션 + 아이콘
 │
 ├── actions/                      # Server Actions
 │   ├── events.ts                 # 이벤트 CRUD 액션
 │   ├── participations.ts         # 참여 관리 액션
-│   └── posts.ts                  # 공지/댓글 액션
+│   ├── posts.ts                  # 공지/댓글 액션
+│   └── carpools.ts               # 카풀 등록/신청/관리 액션
 │
 ├── types/                        # TypeScript 타입 정의
 │   ├── database.types.ts         # Supabase 자동생성 타입 (수정 금지)
 │   ├── action.ts                 # ActionResult<T> 공통 반환 타입
 │   ├── event.ts                  # 이벤트 타입 + EventWithHost
 │   ├── participation.ts          # 참여 타입 + 조인 타입
-│   └── post.ts                   # 게시물 타입 + PostWithAuthor
+│   ├── post.ts                   # 게시물 타입 + PostWithAuthor
+│   └── carpool.ts                # 카풀 타입 + CarpoolWithDriver 등
 │
 ├── supabase/                     # Supabase 로컬 개발 설정
 │   ├── migrations/               # DB 마이그레이션 SQL 파일
@@ -143,6 +157,12 @@ project-root/
 │
 ├── docs/                         # 프로젝트 문서
 │   ├── guides/                   # 개발 가이드
+│   │   ├── nextjs-16.md          # Next.js 16 규칙
+│   │   ├── project-structure.md  # 폴더 구조 (이 파일)
+│   │   ├── component-patterns.md # 컴포넌트 패턴
+│   │   ├── forms-react-hook-form.md # 폼 처리 패턴
+│   │   ├── styling-guide.md      # TailwindCSS + shadcn/ui 스타일링
+│   │   └── supabase-rls.md       # RLS 정책 전체 정리 및 패턴
 │   └── planning/                 # PRD, 로드맵
 │
 ├── middleware.ts                  # Next.js 미들웨어 (루트)

@@ -15,6 +15,8 @@
 - **컴포넌트 패턴**: `docs/guides/component-patterns.md` - 컴포넌트 분류, 작성 패턴, Composition 패턴
 - **폼 처리**: `docs/guides/forms-react-hook-form.md` - React Hook Form + Zod + Server Actions 폼 패턴
 - **스타일링**: `docs/guides/styling-guide.md` - TailwindCSS + shadcn/ui 스타일링 규칙, 다크 모드, 반응형
+- **Supabase RLS**: `docs/guides/supabase-rls.md` - 테이블별 RLS 정책 상세, 패턴, 주의사항
+- **DB 스키마**: `docs/guides/supabase-database-schema.md` - 테이블 컬럼/타입/제약조건, 인덱스, 관계 다이어그램, 트리거, 함수 목록
 
 ## 개발 PRD 및 로드맵 참조 위치
 
@@ -45,12 +47,14 @@
 - 비인증 사용자는 `/`, `/auth/*`, `/login` 외 경로 접근 시 `/auth/login`으로 리다이렉트
 - role = 'admin' 사용자는 로그인 시 `/admin`으로 리다이렉트, `/admin/*` 경로는 admin만 접근 가능
 
-### DB 스키마 (Phase 0~2 구현 완료)
+### DB 스키마 (Phase 0~3 구현 완료)
 
 - **profiles** — 사용자 프로필 (id, email, name, username, avatar_url, role, ...)
 - **events** — 이벤트 (id, host_id, title, category, event_date, location, max_participants, cover_image_url, is_public, ...)
 - **participations** — 참여 신청 (id, event_id, user_id, status: pending|approved|rejected, message, attended)
 - **posts** — 게시물 (id, event_id, author_id, type: notice|comment, content, ...)
+- **carpools** — 카풀 등록 (id, event_id, driver_id, departure_location, departure_time, total_seats, available_seats, note, ...)
+- **carpool_requests** — 카풀 탑승 신청 (id, carpool_id, requester_id, status: pending|approved|rejected, message, ...)
 
 ### DB 타입
 
