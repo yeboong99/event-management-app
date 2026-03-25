@@ -14,22 +14,53 @@
 
 ### 구현 완료
 
+**Phase 0: 기반 설정**
+
+- **TailwindCSS v4 마이그레이션:** v3 → v4 업그레이드, CSS 변수 기반 테마 전환 완료
+- **DB 스키마 확장:** `profiles` 테이블에 `role` 컬럼 추가, `name` 컬럼 rename
+- **라우트 그룹:** `(app)`, `(host)`, `(participant)`, `admin` 라우트 그룹 생성 및 레이아웃 구성
+- **미들웨어 admin 접근 제어:** `/admin/*` 경로에 role 기반 리디렉션 동작
+- **관리자 레이아웃:** 사이드바 + GNB + 다크모드 토글 구성
+
+**Phase 1: 이벤트 CRUD + 탐색**
+
+- **DB 스키마:** `events` 테이블 + `event_category` enum + RLS 정책 + 인덱스
+- **이벤트 CRUD:** 생성/조회/수정/삭제 Server Actions (`actions/events.ts`)
+- **이벤트 탐색:** 공개 이벤트 카드 목록, 카테고리 필터 (세그먼트 탭)
+- **이벤트 상세:** 커버 이미지, 카테고리 배지, 일시/장소/인원/설명, 초대 링크 복사
+- **이미지 업로드:** Supabase Storage 연동, 커버 이미지 추가/변경/제거
+- **내 활동:** 주최 중 탭 (카테고리 필터), 참여 중 탭
+- **모바일 UI:** 하단 5탭 네비게이션 (탐색/내 활동/만들기/카풀/프로필)
+- **관리자:** 대시보드, 이벤트 관리, 사용자 관리 페이지 구현
+
+**Phase 2: 참여자 관리 + 공지/댓글**
+
+- **DB 스키마:** `participations` 테이블 (UNIQUE(event_id, user_id), RLS) + `posts` 테이블 (type: notice/comment, RLS)
+- **동시성 제어:** `approve_participation` RPC 함수 (FOR UPDATE 잠금, max_participants 검증)
+- **참여 관리:** 참여 신청/승인/거절/취소/출석 토글 Server Actions (`actions/participations.ts`)
+- **공지/댓글:** 게시물 CRUD + 페이지네이션 Server Actions (`actions/posts.ts`)
+- **권한 검증:** isEventHost(), isApprovedParticipant() 헬퍼 함수
+- **참여자 UI:** 참여자 목록 (상태별 필터), 승인/거절 버튼, 출석 토글 (useOptimistic)
+- **게시판 UI:** 공지 피드 (최상단 고정), 댓글 피드, 인라인 수정, 더보기 페이지네이션
+- **접근 제어:** 비승인 사용자 접근 제한 안내 컴포넌트
+
+**공통 인프라**
+
 - **인증 시스템:** 이메일/비밀번호 회원가입, 로그인, Google OAuth, 비밀번호 재설정, 로그아웃 (`app/auth/*`)
-- **Supabase 클라이언트:** browser/server/proxy 3종 클라이언트 구성 완료 (`lib/supabase/`)
+- **Supabase 클라이언트:** browser/server/proxy 3종 클라이언트 구성 (`lib/supabase/`)
 - **미들웨어:** 쿠키 기반 세션 관리, 비인증 사용자 리디렉션 (`proxy.ts`)
-- **기본 shadcn/ui 컴포넌트:** button, card, badge, checkbox, dropdown-menu, input, label (`components/ui/`)
+- **shadcn/ui 컴포넌트:** button, card, badge, checkbox, dropdown-menu, input, label, dialog, tabs, textarea, select, separator, sheet, skeleton, avatar, sonner, form, radio-group
 - **코드 품질 도구:** ESLint, Prettier, Husky + lint-staged, Knip 설정 완료
-- **패키지:** react-hook-form, zod, date-fns, recharts, lucide-react 이미 설치됨
+- **검증 스키마:** event.ts, participation.ts, post.ts, image.ts (`lib/validations/`)
+- **도메인 타입:** event.ts, participation.ts, post.ts, action.ts (`types/`)
 
-### 미구현 / Placeholder 상태
+### 미구현 (Phase 3+)
 
-- **루트 페이지 (`app/page.tsx`):** Supabase 스타터 템플릿 기본 페이지 — 역할별 리디렉션 로직 없음
-- **DB 스키마:** `profiles` 테이블만 존재, `role` 컬럼 없음, `full_name` 컬럼 사용 (PRD에서는 `name`으로 명세)
-- **라우팅 구조:** `(host)/*`, `(participant)/*`, `admin/*` 라우트 그룹 전혀 없음
-- **레이아웃:** 모바일 하단 탭, 관리자 사이드바/GNB 없음
-- **핵심 기능 전체:** 이벤트 CRUD, 참여자 관리, 공지/댓글, 카풀, 정산 — 모두 미구현
-- **TailwindCSS:** v3 사용 중 (PRD에서 v4 명세)
-- **미들웨어 admin 접근 제어:** `/admin/*` 경로에 대한 role 기반 리디렉션 없음
+- **카풀 기능:** `carpools`, `carpool_requests` 테이블 미생성, 카풀 관리/탑승 신청 UI 없음 (Phase 3 예정)
+- **정산 기능:** `settlement_items` 테이블 미생성, 정산 알고리즘 및 페이지 없음 (Phase 4 예정)
+- **관리자 KPI/차트:** 대시보드 레이아웃만 구현, KPI 카드·월별 차트·최근 가입자 테이블 미구현 (Phase 4 예정)
+- **프로필 수정:** 프로필 페이지 레이아웃만 존재, 닉네임·아바타 수정 기능 없음 (Phase 5 예정)
+- **비밀번호 변경 / 회원 탈퇴:** 미구현 (Phase 5 예정)
 
 ---
 
@@ -209,61 +240,63 @@
 
 #### Tasks
 
-- [ ] **[TASK-022]** Migration 003 — participations 테이블 + RLS + 인덱스
+- [x] **[TASK-022]** Migration 003 — participations 테이블 + RLS + 인덱스
   - 파일: Supabase 마이그레이션 SQL
   - 예상 시간: 2h
   - 의존성: TASK-004
   - 완료 기준: participations 테이블 생성, `(event_id, user_id)` UNIQUE 제약, `participations(event_id)` + `participations(user_id, status)` 인덱스, RLS 정책 (본인 또는 주최자만 접근), `event_id` FK에 `ON DELETE CASCADE`
 
-- [ ] **[TASK-023]** Migration 004 — posts 테이블 + RLS
+- [x] **[TASK-023]** Migration 004 — posts 테이블 + RLS
   - 파일: Supabase 마이그레이션 SQL
   - 예상 시간: 1.5h
   - 의존성: TASK-022
   - 완료 기준: posts 테이블 생성, RLS 정책 (승인 참여자 + 주최자 접근, 공지는 주최자만 작성), `event_id` FK에 `ON DELETE CASCADE`
 
-- [ ] **[TASK-024]** 참여 승인 동시성 제어 RPC 함수
+- [x] **[TASK-024]** 참여 승인 동시성 제어 RPC 함수
   - 파일: Supabase 마이그레이션 SQL (PostgreSQL 함수)
   - 예상 시간: 3h
   - 의존성: TASK-022
   - 완료 기준: `approve_participation(p_participation_id, p_event_id)` RPC 함수 생성, 현재 승인 인원이 `max_participants` 미만일 때만 승인 처리 (원자적), 초과 시 에러 반환
 
-- [ ] **[TASK-025]** TypeScript 타입 재생성 (participations, posts)
+- [x] **[TASK-025]** TypeScript 타입 재생성 (participations, posts)
   - 파일: `types/database.types.ts`
   - 예상 시간: 30m
   - 의존성: TASK-022, TASK-023, TASK-024
 
-- [ ] **[TASK-026]** Server Actions — 참여자 관리 구현
+- [x] **[TASK-026]** Server Actions — 참여자 관리 구현
   - 파일: `actions/participations.ts`
   - 예상 시간: 4h
   - 의존성: TASK-025
   - 완료 기준: `applyParticipation`, `approveParticipation` (RPC 호출), `rejectParticipation`, `cancelParticipation`, `toggleAttendance` 구현
 
-- [ ] **[TASK-027]** Server Actions — 공지/댓글 구현
+- [x] **[TASK-027]** Server Actions — 공지/댓글 구현
   - 파일: `actions/posts.ts`
   - 예상 시간: 2h
   - 의존성: TASK-025
   - 완료 기준: `createPost`, `updatePost`, `deletePost` 구현, 공지는 주최자만 작성 가능 서버 검증
 
-- [ ] **[TASK-028]** 참여자 관리 페이지 (주최자)
-  - 파일: `app/(host)/events/[eventId]/participants/page.tsx`, `components/shared/participant-list.tsx`, `components/shared/participant-actions.tsx`, `components/shared/attendance-toggle.tsx`
+- [x] **[TASK-028]** 참여자 관리 페이지 (주최자)
+  - 파일: `app/(app)/events/[eventId]/page.tsx` (참여자 탭 통합), `components/shared/participant-list.tsx`, `components/shared/participant-actions.tsx`, `components/shared/attendance-toggle.tsx`
   - 예상 시간: 4h
   - 의존성: TASK-026
   - 완료 기준: 참여 신청 목록 (상태별 필터), 승인/거절 버튼, 출석 체크 토글, 현재 승인 인원 / 최대 인원 표시
+  - 구현 변경: 전용 호스트 라우트 대신 이벤트 상세 페이지의 "참여자" 탭에 통합. ParticipantList에서 주최자 전용 상태 필터 탭(전체/대기/승인/거절)과 승인/거절 버튼을 제공하며, AttendanceToggle로 출석 체크 토글이 가능. 비승인 사용자는 AccessRestrictedNotice로 접근 제한.
 
-- [ ] **[TASK-029]** 공지 및 댓글 관리 페이지 (주최자)
-  - 파일: `app/(host)/events/[eventId]/posts/page.tsx`, `components/shared/post-feed.tsx`, `components/shared/post-item.tsx`, `components/shared/post-actions.tsx`, `components/forms/post-form.tsx`
+- [x] **[TASK-029]** 공지 및 댓글 관리 페이지 (주최자)
+  - 파일: `app/(app)/events/[eventId]/page.tsx` (게시판 탭 통합), `components/shared/posts-section.tsx`, `components/shared/post-feed.tsx`, `components/shared/post-item.tsx`, `components/shared/post-actions.tsx`, `components/forms/post-form.tsx`
   - 예상 시간: 4h
   - 의존성: TASK-027
   - 완료 기준: 공지 피드 (배지 강조, 최신 순), 댓글 피드, 공지 작성 (주최자), 댓글 작성 (승인 참여자), 수정/삭제 액션
+  - 구현 변경: 전용 호스트 라우트 대신 이벤트 상세 페이지의 "게시판" 탭으로 통합. PostForm에서 주최자만 공지 체크박스로 notice/comment 타입 전환 가능하며, PostsSection은 공지를 항상 최상단 정렬로 관리. 작성자 본인과 주최자만 수정/삭제 가능하며, 비승인 사용자는 접근 제한.
 
-- [ ] **[TASK-030]** 이벤트 상세 페이지 (참여자)
-  - 파일: `app/(participant)/events/[eventId]/page.tsx`, `components/forms/participation-form.tsx`
+- [x] **[TASK-030]** 이벤트 상세 페이지 (참여자)
+  - 파일: `app/(app)/events/[eventId]/page.tsx`, `components/forms/participation-form.tsx`
   - 예상 시간: 4h
   - 의존성: TASK-026, TASK-027
   - 완료 기준: 이벤트 정보 표시, 참여 신청 버튼 (메시지 입력), 신청 상태 표시 (대기/승인/거절), 승인 참여자 전용 탭 (공지댓글/카풀/정산) 노출, 공지 및 댓글 피드 조회/작성
 
-- [ ] **[TASK-031]** 내가 참여한 이벤트 목록 페이지 (참여자)
-  - 파일: `app/(participant)/my-events/page.tsx`
+- [x] **[TASK-031]** 내가 참여한 이벤트 목록 페이지 (참여자)
+  - 파일: `app/(app)/my-events/page.tsx`
   - 예상 시간: 2h
   - 의존성: TASK-026
   - 완료 기준: 참여 신청한 이벤트 카드 목록, 상태별 필터 (전체/대기/승인/거절), 참여 취소 버튼 (pending), 빈 상태 UI
@@ -425,37 +458,51 @@
   - 의존성: TASK-005
   - 완료 기준: 프로필 이미지(아바타) 표시, 닉네임 수정, 이메일 표시 (수정 불가), 로그아웃 버튼, Supabase Storage 아바타 업로드
 
-- [ ] **[TASK-051]** 빈 상태 UI 컴포넌트 통합
+- [ ] **[TASK-051]** 비밀번호 변경 기능
+  - 파일: `app/(app)/profile/change-password/page.tsx`, `actions/auth.ts`
+  - 예상 시간: 2h
+  - 의존성: TASK-050
+  - 완료 기준: 현재 비밀번호 재확인 → 새 비밀번호 + 확인 입력 → `supabase.auth.updateUser()` 호출, Zod 이중 검증(클라이언트 + 서버), 성공/실패 토스트 표시, 프로필 페이지에서 비밀번호 변경 링크 제공
+  - 상세: Google OAuth 전용 계정(비밀번호 없음)은 해당 UI 비노출 처리
+
+- [ ] **[TASK-052]** 회원 탈퇴 기능
+  - 파일: `app/(app)/profile/delete-account/page.tsx`, `actions/auth.ts`
+  - 예상 시간: 2h
+  - 의존성: TASK-050
+  - 완료 기준: 탈퇴 확인 다이얼로그(비가역 경고 포함) → `supabase.auth.admin.deleteUser()` 호출로 Auth + profiles 데이터 삭제 → 세션 종료 후 `/auth/login` 리디렉션, 프로필 페이지에서 탈퇴 링크 제공
+  - 상세: 주최 중인 이벤트가 존재하는 경우 탈퇴 전 안내 문구 표시 (이벤트 삭제 또는 양도 권장), Cascade 삭제로 participations/posts 등 관련 데이터 함께 제거
+
+- [ ] **[TASK-053]** 빈 상태 UI 컴포넌트 통합
   - 파일: `components/shared/empty-state.tsx`
   - 예상 시간: 1h
   - 의존성: 없음
   - 완료 기준: 재사용 가능한 빈 상태 컴포넌트 (아이콘 + 메시지 + 액션 버튼), 모든 목록 페이지에 적용
 
-- [ ] **[TASK-052]** 로딩 스켈레톤 + Suspense 경계 추가
+- [ ] **[TASK-054]** 로딩 스켈레톤 + Suspense 경계 추가
   - 파일: 각 라우트의 `loading.tsx`, 컴포넌트 Skeleton 변형
   - 예상 시간: 3h
   - 의존성: 없음
   - 완료 기준: 주요 페이지에 Skeleton UI 로딩 상태 추가, `<Suspense>` 경계 설정
 
-- [ ] **[TASK-053]** 에러 바운더리 추가
+- [ ] **[TASK-055]** 에러 바운더리 추가
   - 파일: `app/(host)/error.tsx`, `app/(participant)/error.tsx`, `app/admin/error.tsx`, `app/not-found.tsx`
   - 예상 시간: 2h
   - 의존성: 없음
   - 완료 기준: 각 라우트 그룹별 error.tsx + 전역 not-found.tsx, 사용자 친화적 에러 메시지 + 재시도 버튼
 
-- [ ] **[TASK-054]** 반응형 디자인 검증 및 보정
+- [ ] **[TASK-056]** 반응형 디자인 검증 및 보정
   - 파일: 전체 레이아웃/컴포넌트
   - 예상 시간: 3h
   - 의존성: Phase 1~4 완료
   - 완료 기준: 모바일(375px) 하단 탭 + 2열 카드, 태블릿(768px) 레이아웃 깨짐 없음, 데스크탑(1280px+) 관리자 사이드바 정상
 
-- [ ] **[TASK-055]** 주최자 뷰 접근 제어 강화 (host_id 검증)
+- [ ] **[TASK-057]** 주최자 뷰 접근 제어 강화 (host_id 검증)
   - 파일: `app/(host)/events/[eventId]/*` 관련 페이지
   - 예상 시간: 2h
   - 의존성: Phase 1~4 완료
   - 완료 기준: 이벤트 상세/편집/관리 페이지에서 `host_id !== auth.uid()` 시 리디렉션 또는 403 처리
 
-- [ ] **[TASK-056]** 참여자 뷰 접근 제어 강화 (승인 참여자 검증)
+- [ ] **[TASK-058]** 참여자 뷰 접근 제어 강화 (승인 참여자 검증)
   - 파일: `app/(participant)/events/[eventId]/*` 관련 페이지
   - 예상 시간: 2h
   - 의존성: Phase 2 완료
@@ -475,40 +522,40 @@
 
 #### Tasks
 
-- [ ] **[TASK-057]** 코드 품질 최종 검증
+- [ ] **[TASK-059]** 코드 품질 최종 검증
   - 파일: 프로젝트 전체
   - 예상 시간: 2h
   - 의존성: Phase 0~5 완료
   - 완료 기준: `npm run type-check` 오류 없음, `npm run lint` 오류 없음, `npm run build` 성공, `npm run knip`으로 미사용 코드 정리
 
-- [ ] **[TASK-058]** SEO 기본 설정
+- [ ] **[TASK-060]** SEO 기본 설정
   - 파일: `app/layout.tsx`, 각 페이지 `metadata` export
   - 예상 시간: 2h
   - 의존성: 없음
   - 완료 기준: 전역 메타데이터 설정, 주요 페이지별 title/description 설정, OG 이미지 기본 설정
 
-- [ ] **[TASK-059]** Vercel 배포 환경 구성
+- [ ] **[TASK-061]** Vercel 배포 환경 구성
   - 파일: Vercel 대시보드, 환경 변수
   - 예상 시간: 2h
   - 의존성: 없음
   - 완료 기준: Vercel 프로젝트 연결, 환경 변수 설정 (Supabase URL/Key, Google OAuth), 프로덕션 빌드 배포 성공
 
-- [ ] **[TASK-060]** E2E 시나리오 검증 (Playwright MCP)
+- [ ] **[TASK-062]** E2E 시나리오 검증 (Playwright MCP)
   - 파일: 테스트 스크립트 또는 수동 검증
   - 예상 시간: 4h
-  - 의존성: Phase 0~5 완료, TASK-059
+  - 의존성: Phase 0~5 완료, TASK-061
   - 완료 기준:
     - 관리자: PC(1280px+) → /admin → KPI 확인 → 이벤트 관리 → 사용자 역할 변경
     - 주최자: 모바일(375px) → 이벤트 생성 → 초대 링크 복사 → 참여자 승인 → 출석 → 정산 → 결과 확인
     - 참여자: 모바일(375px) → 이벤트 탐색 → 참여 신청 → 승인 후 카풀 → 정산 현황 확인
 
-- [ ] **[TASK-061]** Supabase RLS 보안 검증
+- [ ] **[TASK-063]** Supabase RLS 보안 검증
   - 파일: Supabase 대시보드 + 테스트
   - 예상 시간: 2h
   - 의존성: Phase 0~5 완료
   - 완료 기준: 비로그인 → 이벤트 조회 시 리디렉션, 비주최자 → 편집 접근 차단, 미승인 참여자 → 카풀/정산 접근 차단, role='user' → /admin 접근 차단
 
-- [ ] **[TASK-062]** 불필요한 템플릿 코드 정리
+- [ ] **[TASK-064]** 불필요한 템플릿 코드 정리
   - 파일: `components/tutorial/*`, `components/deploy-button.tsx`, `components/hero.tsx`, `components/env-var-warning.tsx`, `components/next-logo.tsx`, `components/supabase-logo.tsx`, `app/protected/*`
   - 예상 시간: 1h
   - 의존성: 없음
@@ -525,7 +572,7 @@
 
 | 항목                          | 설명                                                                                                                           | 우선순위          |
 | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | ----------------- |
-| Supabase 스타터 템플릿 코드   | `components/tutorial/*`, `deploy-button`, `hero`, `next-logo`, `supabase-logo`, `env-var-warning`, `app/protected/*` 삭제 필요 | TASK-062에서 처리 |
+| Supabase 스타터 템플릿 코드   | `components/tutorial/*`, `deploy-button`, `hero`, `next-logo`, `supabase-logo`, `env-var-warning`, `app/protected/*` 삭제 필요 | TASK-064에서 처리 |
 | TailwindCSS v3 → v4           | PRD 명세는 v4이나 현재 v3 사용 중                                                                                              | TASK-001에서 처리 |
 | profiles 테이블 스키마 불일치 | 현재: `full_name`, `username`, `bio`, `website`, `email` / PRD: `name`, `avatar_url`, `role`                                   | TASK-003에서 처리 |
 | 미들웨어 admin 제어 부재      | `/admin/*` 경로에 대한 role 검증 없음                                                                                          | TASK-006에서 처리 |
@@ -600,8 +647,8 @@
 | F008    | 관리자 대시보드     | TASK-045~047                    |
 | F009    | 관리자 데이터 관리  | TASK-048~049                    |
 | F010    | 기본 인증           | 구현 완료 (기존)                |
-| F011    | 역할 기반 접근 제어 | TASK-003, 006~007, 055~056      |
-| F012    | 프로필 기본 관리    | TASK-050                        |
+| F011    | 역할 기반 접근 제어 | TASK-003, 006~007, 057~058      |
+| F012    | 프로필 기본 관리    | TASK-050~052                    |
 
 ---
 

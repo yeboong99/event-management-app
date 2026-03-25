@@ -36,12 +36,21 @@
 - **browser** (`lib/supabase/client.ts`) — Client Component에서 사용, `createBrowserClient`
 - **server** (`lib/supabase/server.ts`) — Server Component/Server Action에서 사용, `createServerClient` + `cookies()`
 - **proxy** (`lib/supabase/proxy.ts`) — 미들웨어 전용, `updateSession()`으로 모든 요청의 세션 갱신
+- **storage** (`lib/supabase/storage.ts`) — 이미지 업로드/삭제 유틸, Supabase Storage `event-covers` 버킷 사용
 
 ### 인증 흐름
 
 - 쿠키 기반 세션 관리 (`@supabase/ssr`)
 - `proxy.ts`의 `updateSession()`이 미들웨어에서 매 요청마다 세션 체크
 - 비인증 사용자는 `/`, `/auth/*`, `/login` 외 경로 접근 시 `/auth/login`으로 리다이렉트
+- role = 'admin' 사용자는 로그인 시 `/admin`으로 리다이렉트, `/admin/*` 경로는 admin만 접근 가능
+
+### DB 스키마 (Phase 0~2 구현 완료)
+
+- **profiles** — 사용자 프로필 (id, email, name, username, avatar_url, role, ...)
+- **events** — 이벤트 (id, host_id, title, category, event_date, location, max_participants, cover_image_url, is_public, ...)
+- **participations** — 참여 신청 (id, event_id, user_id, status: pending|approved|rejected, message, attended)
+- **posts** — 게시물 (id, event_id, author_id, type: notice|comment, content, ...)
 
 ### DB 타입
 
@@ -58,13 +67,22 @@
 - 시맨틱 색상 사용 (`bg-primary`, `text-destructive` 등)
 - `@/` 절대 경로 별칭 사용
 
-## 자주 사용하는 서브에이전트
+## 서브에이전트 위임 규칙
 
-plan 모드로 작업 계획을 세울 때 작업에서 구현 사항이 있다면 각 구현 분야에 대하여 아래 서브에이전트를 적극적으로 활용하세요.
+IMPORTANT: 구현 작업이 포함된 plan을 작성할 때, plan 파일의 구현 단계에 반드시 아래 서브에이전트 위임을 명시해야 합니다.
 만약 해당 서브에이전트가 존재하지 않을 경우 보고합니다.
 
-- 일반적인 nextjs + supabase 관련 개발 구현: nextjs-supabase-fullstack 서브에이전트
-- ui 관련 개발 구현: nextjs-ui-markup 서브에이전트
+| 작업 유형                                                                      | 담당 서브에이전트           |
+| ------------------------------------------------------------------------------ | --------------------------- |
+| Next.js 페이지, Server Action, Supabase 쿼리, API, 인증 등 일반 fullstack 구현 | `nextjs-supabase-fullstack` |
+| UI 마크업, 컴포넌트 레이아웃, 스타일링 (비즈니스 로직 없는 순수 UI)            | `nextjs-ui-markup`          |
+
+MUST: plan 파일의 구현 단계는 아래 형식으로 서브에이전트 위임을 명시할 것:
+
+- 예: "Step 2: [nextjs-supabase-fullstack] 이벤트 목록 Server Action 구현"
+- 예: "Step 3: [nextjs-ui-markup] 이벤트 카드 UI 마크업 작성"
+
+plan 모드 종료 후 실행 단계에서 위 서브에이전트들을 Agent 도구로 호출하여 각 단계를 위임한다.
 
 ## 자주 사용하는 명령어
 

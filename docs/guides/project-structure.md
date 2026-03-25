@@ -8,92 +8,145 @@
 project-root/
 ├── app/                          # App Router (라우팅 + 페이지)
 │   ├── layout.tsx                # 루트 레이아웃
-│   ├── page.tsx                  # 홈 페이지 (/)
+│   ├── page.tsx                  # 홈 페이지 (/) — 역할별 리디렉션
 │   ├── globals.css               # 전역 CSS
 │   ├── not-found.tsx             # 전역 404 페이지
-│   ├── error.tsx                 # 전역 에러 페이지
-│   ├── loading.tsx               # 전역 로딩 UI
-│   ├── favicon.ico               # 파비콘
-│   ├── opengraph-image.png       # OG 이미지
-│   ├── (public)/                 # 비인증 라우트 그룹
-│   │   ├── layout.tsx
-│   │   └── about/
-│   │       └── page.tsx
-│   ├── (protected)/              # 인증 필요 라우트 그룹
-│   │   ├── layout.tsx            # 인증 체크 + 공통 네비게이션
-│   │   ├── dashboard/
-│   │   │   ├── page.tsx
-│   │   │   ├── loading.tsx
-│   │   │   └── error.tsx
-│   │   └── events/
-│   │       ├── page.tsx          # 이벤트 목록
-│   │       ├── new/
-│   │       │   └── page.tsx      # 이벤트 생성
-│   │       └── [id]/
-│   │           ├── page.tsx      # 이벤트 상세
-│   │           └── edit/
-│   │               └── page.tsx  # 이벤트 수정
-│   ├── auth/                     # 인증 라우트
-│   │   ├── login/
-│   │   │   └── page.tsx
-│   │   ├── sign-up/
-│   │   │   └── page.tsx
-│   │   └── confirm/
-│   │       └── route.ts          # 이메일 확인 콜백 (Route Handler)
-│   └── api/                      # API Route Handlers (필요 시)
-│       └── webhooks/
-│           └── route.ts
+│   ├── (app)/                    # 인증된 일반 사용자 라우트 그룹 (주최자/참여자 통합)
+│   │   ├── layout.tsx            # MobileHeader + UnifiedBottomNav
+│   │   ├── discover/
+│   │   │   └── page.tsx          # 이벤트 탐색 (공개 이벤트, 카테고리 필터)
+│   │   ├── events/
+│   │   │   ├── new/
+│   │   │   │   └── page.tsx      # 이벤트 생성
+│   │   │   └── [eventId]/
+│   │   │       ├── page.tsx      # 이벤트 상세 (참여자/게시판 탭 통합)
+│   │   │       └── edit/
+│   │   │           └── page.tsx  # 이벤트 수정 (주최자만)
+│   │   ├── my-events/
+│   │   │   └── page.tsx          # 내 활동 (참여 중 / 주최 중 탭)
+│   │   ├── carpools/
+│   │   │   └── page.tsx          # 카풀 (Phase 3 예정, 현재 placeholder)
+│   │   └── profile/
+│   │       └── page.tsx          # 프로필 (Phase 5 예정, 현재 placeholder)
+│   ├── admin/                    # 관리자 전용 라우트 (데스크탑)
+│   │   ├── layout.tsx            # AdminSidebar + AdminHeader
+│   │   ├── page.tsx              # 대시보드 (레이아웃만, KPI는 Phase 4 예정)
+│   │   ├── events/
+│   │   │   └── page.tsx          # 이벤트 관리
+│   │   └── users/
+│   │       └── page.tsx          # 사용자 관리
+│   └── auth/                     # 인증 라우트 (레이아웃 없음)
+│       ├── login/
+│       │   └── page.tsx
+│       ├── sign-up/
+│       │   └── page.tsx
+│       ├── forgot-password/
+│       │   └── page.tsx
+│       ├── update-password/
+│       │   └── page.tsx
+│       ├── sign-up-success/
+│       │   └── page.tsx
+│       ├── error/
+│       │   └── page.tsx
+│       ├── callback/
+│       │   └── route.ts          # OAuth 콜백 (Route Handler)
+│       └── confirm/
+│           └── route.ts          # 이메일 확인 (Route Handler)
 │
 ├── components/                   # 공유 컴포넌트
-│   ├── ui/                       # shadcn/ui 기본 컴포넌트 (자동생성, 수정 최소화)
+│   ├── ui/                       # shadcn/ui 기본 컴포넌트 (자동생성, 수정 금지)
 │   │   ├── button.tsx
 │   │   ├── input.tsx
 │   │   ├── card.tsx
+│   │   ├── badge.tsx
+│   │   ├── checkbox.tsx
+│   │   ├── dialog.tsx
+│   │   ├── dropdown-menu.tsx
+│   │   ├── tabs.tsx
+│   │   ├── textarea.tsx
+│   │   ├── select.tsx
+│   │   ├── separator.tsx
+│   │   ├── sheet.tsx
+│   │   ├── skeleton.tsx
+│   │   ├── avatar.tsx
+│   │   ├── sonner.tsx
+│   │   ├── form.tsx              # React Hook Form 연동
+│   │   ├── radio-group.tsx
 │   │   └── ...
-│   ├── forms/                    # 폼 관련 컴포넌트
-│   │   ├── sign-up-form.tsx
-│   │   ├── event-form.tsx
-│   │   └── ...
-│   ├── layout/                   # 레이아웃 컴포넌트
-│   │   ├── header.tsx
-│   │   ├── footer.tsx
-│   │   ├── sidebar.tsx
-│   │   └── nav-links.tsx
-│   └── shared/                   # 범용 재사용 컴포넌트
-│       ├── data-table.tsx
-│       ├── pagination.tsx
-│       ├── empty-state.tsx
-│       └── confirm-dialog.tsx
+│   ├── forms/                    # 폼 컴포넌트
+│   │   ├── event-form.tsx        # 이벤트 생성/수정 폼
+│   │   ├── participation-form.tsx # 참여 신청 폼
+│   │   └── post-form.tsx         # 게시물 작성 폼
+│   ├── shared/                   # 범용 재사용 컴포넌트
+│   │   ├── access-restricted-notice.tsx  # 접근 제한 안내
+│   │   ├── attendance-toggle.tsx         # 출석 토글 (useOptimistic)
+│   │   ├── back-button.tsx               # 뒤로가기
+│   │   ├── cancel-participation-button.tsx # 참여 취소
+│   │   ├── confirm-dialog.tsx            # 확인 다이얼로그
+│   │   ├── copy-link-button.tsx          # 초대 링크 복사
+│   │   ├── participant-actions.tsx       # 승인/거절 버튼
+│   │   ├── participant-list.tsx          # 참여자 목록 (필터 탭)
+│   │   ├── post-actions.tsx              # 게시물 수정/삭제
+│   │   ├── post-feed.tsx                 # 페이지네이션 피드
+│   │   ├── post-item.tsx                 # 개별 게시물 (인라인 수정)
+│   │   ├── posts-section.tsx             # 게시판 섹션
+│   │   └── toast-handler.tsx             # URL 쿼리 기반 토스트
+│   ├── mobile/                   # 모바일 전용 컴포넌트
+│   │   ├── mobile-header.tsx
+│   │   ├── unified-bottom-nav.tsx
+│   │   ├── event-card-mobile.tsx
+│   │   ├── event-category-badge.tsx
+│   │   └── category-tabs-scroll.tsx
+│   ├── admin/                    # 관리자 전용 컴포넌트
+│   │   ├── admin-header.tsx
+│   │   ├── admin-sidebar.tsx
+│   │   ├── admin-header-profile.tsx
+│   │   └── dark-mode-toggle.tsx
+│   ├── login-form.tsx            # 인증 폼 (루트 레벨)
+│   ├── sign-up-form.tsx
+│   ├── forgot-password-form.tsx
+│   ├── update-password-form.tsx
+│   ├── auth-button.tsx
+│   ├── logout-button.tsx
+│   └── theme-switcher.tsx
 │
 ├── lib/                          # 유틸리티 및 라이브러리
-│   ├── utils.ts                  # cn() 등 범용 유틸
-│   ├── constants.ts              # 상수 정의
+│   ├── utils.ts                  # cn(), kstDatetimeLocalToUtc() 등 범용 유틸
 │   ├── supabase/                 # Supabase 클라이언트
-│   │   ├── client.ts             # 브라우저 클라이언트
-│   │   ├── server.ts             # 서버 클라이언트
-│   │   └── middleware.ts         # 미들웨어용 클라이언트
-│   └── validations/              # Zod 스키마
-│       ├── auth.ts
-│       └── event.ts
+│   │   ├── client.ts             # 브라우저 클라이언트 (Client Component용)
+│   │   ├── server.ts             # 서버 클라이언트 (Server Component/Action용)
+│   │   ├── proxy.ts              # 미들웨어 전용 (updateSession)
+│   │   └── storage.ts            # 이미지 업로드/삭제 유틸 (Supabase Storage)
+│   ├── validations/              # Zod 스키마
+│   │   ├── event.ts              # 이벤트 검증 스키마
+│   │   ├── image.ts              # 이미지 검증 유틸
+│   │   ├── participation.ts      # 참여 검증 스키마
+│   │   └── post.ts               # 게시물 검증 스키마
+│   └── constants/
+│       └── event-gradients.ts    # 카테고리별 배경 그라데이션 + 아이콘
 │
 ├── actions/                      # Server Actions
-│   ├── auth.ts                   # 인증 관련 액션
-│   └── events.ts                 # 이벤트 CRUD 액션
-│
-├── hooks/                        # 커스텀 훅
-│   ├── use-debounce.ts
-│   └── use-media-query.ts
+│   ├── events.ts                 # 이벤트 CRUD 액션
+│   ├── participations.ts         # 참여 관리 액션
+│   └── posts.ts                  # 공지/댓글 액션
 │
 ├── types/                        # TypeScript 타입 정의
-│   ├── database.types.ts         # Supabase 자동생성 타입
-│   └── index.ts                  # 도메인 타입 정의
+│   ├── database.types.ts         # Supabase 자동생성 타입 (수정 금지)
+│   ├── action.ts                 # ActionResult<T> 공통 반환 타입
+│   ├── event.ts                  # 이벤트 타입 + EventWithHost
+│   ├── participation.ts          # 참여 타입 + 조인 타입
+│   └── post.ts                   # 게시물 타입 + PostWithAuthor
+│
+├── supabase/                     # Supabase 로컬 개발 설정
+│   ├── migrations/               # DB 마이그레이션 SQL 파일
+│   └── config.toml               # Supabase CLI 설정
 │
 ├── docs/                         # 프로젝트 문서
-│   └── guides/                   # 개발 가이드
+│   ├── guides/                   # 개발 가이드
+│   └── planning/                 # PRD, 로드맵
 │
 ├── middleware.ts                  # Next.js 미들웨어 (루트)
 ├── next.config.ts                # Next.js 설정
-├── tailwind.config.ts            # Tailwind 설정
 ├── tsconfig.json                 # TypeScript 설정
 └── package.json
 ```
@@ -146,27 +199,30 @@ project-root/
 app/
 ├── (app)/              # URL: / (괄호 부분 미포함) — 인증된 일반 사용자 영역
 │   ├── layout.tsx      # 통합 레이아웃 (MobileHeader + UnifiedBottomNav)
-│   ├── discover/page.tsx    # URL: /discover
-│   ├── my-events/page.tsx   # URL: /my-events
-│   ├── carpools/page.tsx    # URL: /carpools
-│   ├── profile/page.tsx     # URL: /profile
+│   ├── discover/page.tsx        # URL: /discover
+│   ├── my-events/page.tsx       # URL: /my-events
+│   ├── carpools/page.tsx        # URL: /carpools
+│   ├── profile/page.tsx         # URL: /profile
 │   └── events/
-│       ├── new/page.tsx     # URL: /events/new
-│       └── [eventId]/page.tsx  # URL: /events/{id}
+│       ├── new/page.tsx         # URL: /events/new
+│       └── [eventId]/page.tsx   # URL: /events/{id}
+│           └── edit/page.tsx    # URL: /events/{id}/edit
 ├── admin/              # URL: /admin — 관리자 전용 (데스크탑)
 │   ├── layout.tsx      # 관리자 레이아웃 (AdminSidebar + AdminHeader)
 │   ├── page.tsx
 │   ├── events/page.tsx
 │   └── users/page.tsx
-├── auth/               # URL: /auth — 인증 플로우
-│   ├── login/page.tsx
-│   └── sign-up/page.tsx
+└── auth/               # URL: /auth — 인증 플로우
+    ├── login/page.tsx
+    ├── sign-up/page.tsx
+    ├── callback/route.ts
+    └── confirm/route.ts
 ```
 
 **이 프로젝트의 라우트 그룹 활용 사례:**
 
 - `(app)`: 로그인한 일반 사용자(주최자/참여자 통합)의 모든 기능 — 통합 하단 탭 5개(탐색/내활동/만들기/카풀/프로필)
-- `admin`: 관리자 전용 뷰 — 데스크탑 레이아웃(사이드바 + GNB)
+- `admin`: 관리자 전용 뷰 — 데스크탑 레이아웃(사이드바 + GNB), role = 'admin'만 접근 가능
 - `auth`: 인증 플로우 — 레이아웃 없음, 독립 페이지
 
 ## 모듈 임포트 순서

@@ -163,10 +163,18 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { eventFormSchema } from "@/lib/validations/event";
 
-// 반환 타입을 명확히 정의
+// useActionState와 함께 사용하는 반환 타입
 type ActionState = {
   errors?: Record<string, string[]>;
   message?: string;
+};
+
+// 직접 호출하는 Server Action의 공통 반환 타입
+// types/action.ts 참조
+type ActionResult<T = undefined> = {
+  success: boolean;
+  error?: string;
+  data?: T;
 };
 
 export async function createEvent(
@@ -209,6 +217,23 @@ export async function createEvent(
 }
 ```
 
+### ActionResult 공통 반환 타입
+
+Server Action의 반환 타입을 통일하는 제네릭 타입:
+
+```tsx
+// types/action.ts
+type ActionResult<T = undefined> = {
+  success: boolean;
+  error?: string;
+  data?: T;
+};
+```
+
+- `useActionState` 없이 직접 호출하는 Server Action에서 사용
+- `data` 제네릭으로 반환 데이터 타입 지정 가능
+- 예: `ActionResult<PostWithAuthor>` — 생성된 게시물 데이터 반환
+
 ### useActionState와 함께 사용
 
 ```tsx
@@ -225,7 +250,7 @@ export function CreateEventForm() {
     <form action={action}>
       <input name="title" />
       {state?.errors?.title && (
-        <p className="text-sm text-destructive">{state.errors.title[0]}</p>
+        <p className="text-destructive text-sm">{state.errors.title[0]}</p>
       )}
       <Button type="submit" disabled={isPending}>
         {isPending ? "생성 중..." : "이벤트 생성"}
