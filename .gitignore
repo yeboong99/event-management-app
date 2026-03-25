@@ -68,3 +68,6 @@ node_modules/
 # Claude Code hooks runtime state (세션별 임시 파일)
 .claude/.taskmaster-state-*.json
 .claude/hooks/taskmaster.log
+
+# 민감한 정보가 포함된 로컬 파일
+테스트 계정 정보 요약.png
