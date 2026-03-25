@@ -2,5 +2,6 @@
 export type ActionResult<T = undefined> = {
   success: boolean;
   error?: string;
+  errorCode?: string;
   data?: T;
 };

@@ -14,6 +14,102 @@ export type Database = {
   }
   public: {
     Tables: {
+      carpool_requests: {
+        Row: {
+          carpool_id: string
+          created_at: string | null
+          id: string
+          message: string | null
+          passenger_id: string
+          status: Database["public"]["Enums"]["carpool_request_status"]
+          updated_at: string | null
+        }
+        Insert: {
+          carpool_id: string
+          created_at?: string | null
+          id?: string
+          message?: string | null
+          passenger_id: string
+          status?: Database["public"]["Enums"]["carpool_request_status"]
+          updated_at?: string | null
+        }
+        Update: {
+          carpool_id?: string
+          created_at?: string | null
+          id?: string
+          message?: string | null
+          passenger_id?: string
+          status?: Database["public"]["Enums"]["carpool_request_status"]
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "carpool_requests_carpool_id_fkey"
+            columns: ["carpool_id"]
+            isOneToOne: false
+            referencedRelation: "carpools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "carpool_requests_passenger_id_fkey"
+            columns: ["passenger_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      carpools: {
+        Row: {
+          created_at: string | null
+          departure_place: string
+          departure_time: string | null
+          description: string | null
+          driver_id: string
+          event_id: string
+          id: string
+          total_seats: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          departure_place: string
+          departure_time?: string | null
+          description?: string | null
+          driver_id: string
+          event_id: string
+          id?: string
+          total_seats: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          departure_place?: string
+          departure_time?: string | null
+          description?: string | null
+          driver_id?: string
+          event_id?: string
+          id?: string
+          total_seats?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "carpools_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "carpools_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           category: Database["public"]["Enums"]["event_category"]
@@ -145,6 +241,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "posts_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "posts_event_id_fkey"
             columns: ["event_id"]
             isOneToOne: false
@@ -197,8 +300,37 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      approve_carpool_request: {
+        Args: { p_carpool_id: string; p_request_id: string }
+        Returns: boolean
+      }
       approve_participation: {
         Args: { p_event_id: string; p_participation_id: string }
+        Returns: boolean
+      }
+      get_event_participant_count: {
+        Args: { p_event_id: string }
+        Returns: number
+      }
+      get_events_participant_counts: {
+        Args: { p_event_ids: string[] }
+        Returns: {
+          event_id: string
+          participant_count: number
+        }[]
+      }
+      is_approved_participant_for_event: {
+        Args: { event_uuid: string }
+        Returns: boolean
+      }
+      update_carpool_info: {
+        Args: {
+          p_carpool_id: string
+          p_departure_place: string
+          p_departure_time: string
+          p_description: string
+          p_total_seats: number
+        }
         Returns: boolean
       }
     }

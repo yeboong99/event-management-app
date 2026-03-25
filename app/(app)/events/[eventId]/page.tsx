@@ -16,6 +16,7 @@ import { ParticipationForm } from "@/components/forms/participation-form";
 import { EventCategoryBadge } from "@/components/mobile/event-category-badge";
 import { AccessRestrictedNotice } from "@/components/shared/access-restricted-notice";
 import { CancelParticipationButton } from "@/components/shared/cancel-participation-button";
+import { CarpoolSection } from "@/components/shared/carpool-section";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { CopyLinkButton } from "@/components/shared/copy-link-button";
 import { ParticipantList } from "@/components/shared/participant-list";
@@ -319,13 +320,14 @@ export default async function EventDetailPage({
             </TabsContent>
 
             <TabsContent value="carpool">
-              {canAccessContent ? (
-                <p className="text-muted-foreground py-8 text-center text-sm">
-                  카풀 기능은 Phase 3에서 제공됩니다.
-                </p>
-              ) : (
-                <AccessRestrictedNotice />
-              )}
+              <Suspense fallback={<div>로딩 중...</div>}>
+                <CarpoolSection
+                  eventId={eventId}
+                  currentUserId={user.id}
+                  isHost={isHost}
+                  isApproved={isApproved}
+                />
+              </Suspense>
             </TabsContent>
 
             <TabsContent value="settlement">
