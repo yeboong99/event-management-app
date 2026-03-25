@@ -63,4 +63,8 @@ node_modules/
 
 # Task files
 # tasks.json
-# tasks/ 
+# tasks/
+
+# Claude Code hooks runtime state (세션별 임시 파일)
+.claude/.taskmaster-state-*.json
+.claude/hooks/taskmaster.log

@@ -20,6 +20,29 @@
   },
   "plansDirectory": ".claude/plans",
   "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "mcp__taskmaster-ai__get_task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/taskmaster-track.sh",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/taskmaster-done.sh",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
     "Notification": [
       {
         "matcher": "permission_prompt",

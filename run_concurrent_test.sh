@@ -121,12 +121,46 @@ if [ "${USE_PSQL_FALLBACK}" = "true" ]; then
 else
   # -------------------------------------------------------
   # pgbench 실행 (권장 방법)
-  # -c 10: 동시 클라이언트 10개
-  # -t 1 : 클라이언트당 트랜잭션 1회
-  # -n   : 초기화(VACUUM) 생략
-  # -f   : 커스텀 스크립트 파일 지정
+  # -c 10  : 동시 클라이언트 10개
+  # -t 1   : 클라이언트당 트랜잭션 1회
+  # -n     : 초기화(VACUUM) 생략
+  # -f     : 커스텀 스크립트 파일 지정
+  #
+  # UUID 변수 치환 우회 전략:
+  #   pgbench의 :'var' 문법이 UUID 처리에 실패하는 경우를 대비해
+  #   event_id를 psql로 먼저 조회한 뒤, 임시 스크립트에 직접 삽입
   # -------------------------------------------------------
-  pgbench -c 10 -t 1 -n -f "$SCRIPT_DIR/02_pgbench_script.sql" "$DB_URL"
+
+  # event_id를 psql로 미리 조회
+  EVENT_ID=$(psql "$DB_URL" -t -c \
+    "SELECT id FROM events WHERE title = '[TEST] Concurrent Approval Test' LIMIT 1;" \
+    | tr -d ' \n')
+
+  if [ -z "$EVENT_ID" ]; then
+    echo "ERROR: 테스트 이벤트를 찾을 수 없습니다. 01_setup.sql 실행을 확인하세요."
+    exit 1
+  fi
+
+  echo "      이벤트 ID: $EVENT_ID"
+
+  # UUID를 하드코딩한 임시 pgbench 스크립트 생성 (:client_id 는 pgbench 내장 변수)
+  PGBENCH_TMP=$(mktemp /tmp/pgbench_task43_XXXXXX.sql)
+  cat > "$PGBENCH_TMP" << PGBENCH_SCRIPT
+SELECT approve_participation(
+  (SELECT id
+   FROM participations
+   WHERE event_id = '$EVENT_ID'::uuid
+     AND status = 'pending'
+   ORDER BY created_at
+   LIMIT 1 OFFSET :client_id),
+  '$EVENT_ID'::uuid
+) AS result;
+PGBENCH_SCRIPT
+
+  # pgbench는 일부 클라이언트가 예외(max_participants_exceeded)로 종료될 때
+  # non-zero exit code를 반환하므로, set -e 의 영향을 받지 않도록 처리
+  pgbench -c 10 -t 1 -n -f "$PGBENCH_TMP" "$DB_URL" || true
+  rm -f "$PGBENCH_TMP"
 fi
 
 # =============================================================

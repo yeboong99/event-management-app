@@ -6,10 +6,8 @@
     },
     "context7": {
       "type": "stdio",
-      "command": "cmd",
+      "command": "npx",
       "args": [
-        "/c",
-        "npx",
         "-y",
         "@upstash/context7-mcp",
         "--api-key",
@@ -19,37 +17,32 @@
     },
     "playwright": {
       "type": "stdio",
-      "command": "cmd",
-      "args": ["/c", "npx", "-y", "@playwright/mcp@latest"],
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest"],
       "env": {}
     },
     "sequential-thinking": {
       "type": "stdio",
-      "command": "cmd",
-      "args": [
-        "/c",
-        "npx",
-        "-y",
-        "@modelcontextprotocol/server-sequential-thinking"
-      ],
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
       "env": {}
     },
     "shadcn": {
       "type": "stdio",
-      "command": "cmd",
-      "args": ["/c", "npx", "-y", "shadcn@latest", "mcp"],
+      "command": "npx",
+      "args": ["-y", "shadcn@latest", "mcp"],
       "env": {}
     },
     "memory": {
       "type": "stdio",
-      "command": "cmd",
-      "args": ["/c", "npx", "-y", "@modelcontextprotocol/server-memory"],
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
       "env": {}
     },
     "taskmaster-ai": {
       "type": "stdio",
-      "command": "cmd",
-      "args": ["/c", "npx", "-y", "--package=task-master-ai", "task-master-ai"],
+      "command": "npx",
+      "args": ["-y", "--package=task-master-ai", "task-master-ai"],
       "env": {}
     }
   }
