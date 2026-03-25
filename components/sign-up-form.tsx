@@ -1,8 +1,10 @@
 "use client";
 
+import { CheckCircle2, XCircle } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -16,6 +18,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+
+// 비밀번호 정책: 8자 이상, 영문 대/소문자·숫자·특수문자 중 2가지 이상 조합
+const passwordSchema = z
+  .string()
+  .min(8, "비밀번호는 8자 이상이어야 합니다.")
+  .refine((val) => {
+    const types = [/[A-Z]/, /[a-z]/, /[0-9]/, /[^A-Za-z0-9]/];
+    return types.filter((r) => r.test(val)).length >= 2;
+  }, "영문 대/소문자, 숫자, 특수문자 중 2가지 이상을 포함해야 합니다.");
 
 export function SignUpForm({
   className,
@@ -34,6 +45,14 @@ export function SignUpForm({
     const supabase = createClient();
     setIsLoading(true);
     setError(null);
+
+    // 비밀번호 정책 검증 (Supabase 호출 전)
+    const passwordResult = passwordSchema.safeParse(password);
+    if (!passwordResult.success) {
+      setError("비밀번호 형식이 만족되지 않습니다.");
+      setIsLoading(false);
+      return;
+    }
 
     if (password !== repeatPassword) {
       setError("비밀번호가 일치하지 않습니다");
@@ -102,23 +121,48 @@ export function SignUpForm({
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
+                {/* 비밀번호 형식 안내 */}
+                <p className="text-muted-foreground text-sm">
+                  8자 이상, 영문 대/소문자·숫자·특수문자 중 2가지 이상 조합
+                </p>
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
                   <Label htmlFor="repeat-password">비밀번호 확인</Label>
                 </div>
-                <Input
-                  id="repeat-password"
-                  type="password"
-                  required
-                  value={repeatPassword}
-                  onChange={(e) => setRepeatPassword(e.target.value)}
-                />
+                {/* 비밀번호 확인 입력란 + 일치 여부 아이콘 */}
+                <div className="relative">
+                  <Input
+                    id="repeat-password"
+                    type="password"
+                    required
+                    value={repeatPassword}
+                    onChange={(e) => setRepeatPassword(e.target.value)}
+                    className={cn(repeatPassword.length > 0 && "pr-10")}
+                  />
+                  {repeatPassword.length > 0 && (
+                    <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2">
+                      {password === repeatPassword ? (
+                        <CheckCircle2
+                          className="text-green-500"
+                          size={18}
+                          aria-label="비밀번호 일치"
+                        />
+                      ) : (
+                        <XCircle
+                          className="text-destructive"
+                          size={18}
+                          aria-label="비밀번호 불일치"
+                        />
+                      )}
+                    </span>
+                  )}
+                </div>
               </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? "계정 생성 중..." : "회원가입"}
               </Button>
+              {error && <p className="text-sm text-red-500">{error}</p>}
             </div>
             <div className="mt-4 text-center text-sm">
               이미 계정이 있으신가요?{" "}
