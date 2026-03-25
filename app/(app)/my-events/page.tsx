@@ -117,6 +117,32 @@ function ParticipatingView({
   participations,
   selectedStatus,
 }: ParticipatingViewProps) {
+  // 필터 상태별 빈 상태 메시지 매핑
+  const EMPTY_STATE_MAP = {
+    pending: {
+      title: "대기 중인 신청이 없습니다",
+      desc: "승인을 기다리는 참여 신청이 없습니다.",
+    },
+    approved: {
+      title: "승인된 이벤트가 없습니다",
+      desc: "아직 승인된 참여 신청이 없습니다.",
+    },
+    rejected: {
+      title: "거절된 신청이 없습니다",
+      desc: "거절된 참여 신청이 없습니다.",
+    },
+  };
+
+  const emptyStateMessage = selectedStatus
+    ? (EMPTY_STATE_MAP[selectedStatus as keyof typeof EMPTY_STATE_MAP] ?? {
+        title: "아직 참여한 이벤트가 없습니다",
+        desc: "관심 있는 이벤트를 탐색하고 참여해보세요.",
+      })
+    : {
+        title: "아직 참여한 이벤트가 없습니다",
+        desc: "관심 있는 이벤트를 탐색하고 참여해보세요.",
+      };
+
   return (
     <section aria-label="참여 중인 이벤트 목록">
       {/* 상태 필터 탭 — HostingView의 카테고리 필터와 동일한 패턴 */}
@@ -188,10 +214,10 @@ function ParticipatingView({
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <Calendar className="text-muted-foreground/40 mb-4 h-16 w-16" />
           <h2 className="text-foreground text-lg font-semibold">
-            아직 참여한 이벤트가 없습니다
+            {emptyStateMessage.title}
           </h2>
           <p className="text-muted-foreground mt-2 text-sm">
-            관심 있는 이벤트를 탐색하고 참여해보세요.
+            {emptyStateMessage.desc}
           </p>
           <Link href="/events">
             <Button variant="outline" className="mt-4">
