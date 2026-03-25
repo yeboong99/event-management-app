@@ -1,6 +1,6 @@
 import { formatDistanceToNow, isPast } from "date-fns";
 import { ko } from "date-fns/locale";
-import { Calendar, MapPin, Users } from "lucide-react";
+import { Calendar, MapPin, UserRound, Users } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -90,8 +90,16 @@ export function EventCardMobile({
             {event.title}
           </h3>
 
+          {/* 주최자 */}
+          {event.host.name && (
+            <div className="text-muted-foreground mt-2 flex items-center gap-1 text-xs">
+              <UserRound className="h-3 w-3" />
+              <span className="line-clamp-1">{event.host.name}</span>
+            </div>
+          )}
+
           {/* 일시 */}
-          <div className="text-muted-foreground mt-2 flex items-center gap-1 text-xs">
+          <div className="text-muted-foreground mt-1 flex items-center gap-1 text-xs">
             <Calendar className="h-3 w-3" />
             <span>{relativeDateText}</span>
           </div>
@@ -108,7 +116,10 @@ export function EventCardMobile({
           {event.max_participants && (
             <div className="text-muted-foreground mt-1 flex items-center gap-1 text-xs">
               <Users className="h-3 w-3" />
-              <span>최대 {event.max_participants}명</span>
+              <span>
+                {event.current_participants_count}명 / 최대{" "}
+                {event.max_participants}명
+              </span>
             </div>
           )}
         </CardContent>

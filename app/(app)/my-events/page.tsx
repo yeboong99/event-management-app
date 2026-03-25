@@ -3,11 +3,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { getMyEvents } from "@/actions/events";
+import { getMyParticipations } from "@/actions/participations";
 import { CategoryTabsScroll } from "@/components/mobile/category-tabs-scroll";
 import { EventCardMobile } from "@/components/mobile/event-card-mobile";
+import { CancelParticipationButton } from "@/components/shared/cancel-participation-button";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { type EventWithHost } from "@/types/event";
+import { type ParticipationWithEvent } from "@/types/participation";
 
 export const metadata: Metadata = {
   title: "내 이벤트",
@@ -15,7 +19,7 @@ export const metadata: Metadata = {
 
 type PageProps = {
   // Next.js 16 패턴: searchParams는 Promise로 처리
-  searchParams: Promise<{ tab?: string; category?: string }>;
+  searchParams: Promise<{ tab?: string; category?: string; status?: string }>;
 };
 
 export default async function MyEventsPage({ searchParams }: PageProps) {
@@ -23,10 +27,15 @@ export default async function MyEventsPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const activeTab = params.tab === "hosting" ? "hosting" : "participating";
   const selectedCategory = params.category;
+  const selectedStatus = params.status;
 
-  // hosting 탭일 때만 데이터 fetch (불필요한 DB 호출 방지)
+  // 각 탭에 해당하는 데이터만 fetch (불필요한 DB 호출 방지)
   const hostingEvents =
     activeTab === "hosting" ? await getMyEvents(selectedCategory) : [];
+  const participations =
+    activeTab === "participating"
+      ? await getMyParticipations(selectedStatus)
+      : [];
 
   return (
     <div className="flex flex-col gap-4 p-4">
@@ -69,7 +78,10 @@ export default async function MyEventsPage({ searchParams }: PageProps) {
 
       {/* 탭 콘텐츠 */}
       {activeTab === "participating" ? (
-        <ParticipatingView />
+        <ParticipatingView
+          participations={participations}
+          selectedStatus={selectedStatus}
+        />
       ) : (
         <HostingView
           events={hostingEvents}
@@ -80,26 +92,115 @@ export default async function MyEventsPage({ searchParams }: PageProps) {
   );
 }
 
-// 참여 중 뷰 — placeholder UI (데이터 연결은 별도 작업)
-function ParticipatingView() {
+// 참여 상태별 배지 variant 및 텍스트 매핑
+const STATUS_BADGE_MAP = {
+  pending: { variant: "secondary" as const, label: "대기중" },
+  approved: { variant: "default" as const, label: "승인됨" },
+  rejected: { variant: "destructive" as const, label: "거절됨" },
+};
+
+// 참여 상태 필터 탭 항목 정의
+const STATUS_FILTERS = [
+  { label: "전체", status: undefined },
+  { label: "대기중", status: "pending" },
+  { label: "승인", status: "approved" },
+  { label: "거절", status: "rejected" },
+];
+
+type ParticipatingViewProps = {
+  participations: ParticipationWithEvent[];
+  selectedStatus?: string;
+};
+
+// 참여 중 뷰 — 실제 데이터 연결 (상태 필터 지원)
+function ParticipatingView({
+  participations,
+  selectedStatus,
+}: ParticipatingViewProps) {
   return (
     <section aria-label="참여 중인 이벤트 목록">
-      {/* 빈 상태 placeholder */}
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <Calendar className="text-muted-foreground/40 mb-4 h-16 w-16" />
-        <h2 className="text-foreground text-lg font-semibold">
-          참여 중인 이벤트가 없습니다
-        </h2>
-        <p className="text-muted-foreground mt-2 text-sm">
-          관심 있는 이벤트를 탐색하고 참여해보세요.
-        </p>
-        <Link href="/discover">
-          <Button variant="outline" className="mt-4">
-            <Compass className="mr-2 h-4 w-4" />
-            이벤트 탐색하기
-          </Button>
-        </Link>
+      {/* 상태 필터 탭 — HostingView의 카테고리 필터와 동일한 패턴 */}
+      <div className="scrollbar-hide -mx-4 flex gap-2 overflow-x-auto px-4 pb-2">
+        {STATUS_FILTERS.map(({ label, status }) => {
+          const isActive = selectedStatus === status;
+          const href = status
+            ? `/my-events?tab=participating&status=${status}`
+            : "/my-events";
+
+          return (
+            <Link key={label} href={href}>
+              <Button
+                variant={isActive ? "default" : "outline"}
+                size="sm"
+                className="shrink-0"
+              >
+                {label}
+              </Button>
+            </Link>
+          );
+        })}
       </div>
+
+      {/* 헤더: 참여 수 표시 */}
+      <div className="mt-4 mb-4">
+        <p className="text-muted-foreground text-sm">
+          총 {participations.length}개의 참여
+        </p>
+      </div>
+
+      {/* 참여 목록 또는 빈 상태 */}
+      {participations.length > 0 ? (
+        /* 참여 카드 그리드 */
+        <div className="grid grid-cols-2 gap-3">
+          {participations.map((participation) => (
+            <div key={participation.id} className="flex flex-col gap-2">
+              {/* 이벤트 카드 */}
+              <EventCardMobile
+                event={participation.events as EventWithHost}
+                href={`/events/${participation.event_id}`}
+              />
+              {/* 참여 상태 배지 및 취소 버튼 */}
+              <div className="flex items-center justify-between px-1">
+                <Badge
+                  variant={
+                    STATUS_BADGE_MAP[
+                      participation.status as keyof typeof STATUS_BADGE_MAP
+                    ]?.variant ?? "secondary"
+                  }
+                >
+                  {STATUS_BADGE_MAP[
+                    participation.status as keyof typeof STATUS_BADGE_MAP
+                  ]?.label ?? participation.status}
+                </Badge>
+                {/* pending 상태일 때만 취소 버튼 표시 */}
+                {participation.status === "pending" && (
+                  <CancelParticipationButton
+                    participationId={participation.id}
+                    eventId={participation.event_id}
+                  />
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        /* 빈 상태 */
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <Calendar className="text-muted-foreground/40 mb-4 h-16 w-16" />
+          <h2 className="text-foreground text-lg font-semibold">
+            아직 참여한 이벤트가 없습니다
+          </h2>
+          <p className="text-muted-foreground mt-2 text-sm">
+            관심 있는 이벤트를 탐색하고 참여해보세요.
+          </p>
+          <Link href="/events">
+            <Button variant="outline" className="mt-4">
+              <Compass className="mr-2 h-4 w-4" />
+              이벤트 탐색하기
+            </Button>
+          </Link>
+        </div>
+      )}
     </section>
   );
 }

@@ -345,7 +345,7 @@ export async function deleteEvent(eventId: string): Promise<ActionResult> {
 // ─────────────────────────────────────────────
 
 /**
- * 이벤트 ID로 단일 이벤트를 조회합니다. (주최자 정보 포함)
+ * 이벤트 ID로 단일 이벤트를 조회합니다. (주최자 정보 + 승인된 참여자 수 포함)
  */
 export async function getEventById(
   eventId: string,
@@ -354,7 +354,14 @@ export async function getEventById(
 
   const { data, error } = await supabase
     .from("events")
-    .select("*, host:profiles!host_id(name, avatar_url)")
+    .select(
+      `
+      *,
+      host:profiles!host_id(name, avatar_url),
+      participations(count)
+    `,
+    )
+    .eq("participations.status", "approved")
     .eq("id", eventId)
     .single();
 
@@ -362,7 +369,15 @@ export async function getEventById(
     return null;
   }
 
-  return data as EventWithHost;
+  // participations 필드를 current_participants_count로 변환하여 반환
+  const { participations, ...rest } = data as typeof data & {
+    participations: { count: number }[];
+  };
+
+  return {
+    ...rest,
+    current_participants_count: participations?.[0]?.count ?? 0,
+  } as EventWithHost;
 }
 
 /**
@@ -383,7 +398,14 @@ export async function getMyEvents(category?: string): Promise<EventWithHost[]> {
 
   let query = supabase
     .from("events")
-    .select("*, host:profiles!host_id(name, avatar_url)")
+    .select(
+      `
+      *,
+      host:profiles!host_id(name, avatar_url),
+      participations(count)
+    `,
+    )
+    .eq("participations.status", "approved")
     .eq("host_id", user.id)
     .order("created_at", { ascending: false });
 
@@ -397,7 +419,16 @@ export async function getMyEvents(category?: string): Promise<EventWithHost[]> {
     return [];
   }
 
-  return data as EventWithHost[];
+  // participations 필드를 current_participants_count로 변환하여 반환
+  return data.map((item) => {
+    const { participations, ...rest } = item as typeof item & {
+      participations: { count: number }[];
+    };
+    return {
+      ...rest,
+      current_participants_count: participations?.[0]?.count ?? 0,
+    } as EventWithHost;
+  });
 }
 
 /**
@@ -411,7 +442,14 @@ export async function getPublicEvents(
 
   let query = supabase
     .from("events")
-    .select("*, host:profiles!host_id(name, avatar_url)")
+    .select(
+      `
+      *,
+      host:profiles!host_id(name, avatar_url),
+      participations(count)
+    `,
+    )
+    .eq("participations.status", "approved")
     .eq("is_public", true)
     .order("created_at", { ascending: false });
 
@@ -425,5 +463,14 @@ export async function getPublicEvents(
     return [];
   }
 
-  return data as EventWithHost[];
+  // participations 필드를 current_participants_count로 변환하여 반환
+  return data.map((item) => {
+    const { participations, ...rest } = item as typeof item & {
+      participations: { count: number }[];
+    };
+    return {
+      ...rest,
+      current_participants_count: participations?.[0]?.count ?? 0,
+    } as EventWithHost;
+  });
 }

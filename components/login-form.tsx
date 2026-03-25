@@ -70,9 +70,9 @@ export function LoginForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
+          <CardTitle className="text-2xl">로그인</CardTitle>
           <CardDescription>
-            Enter your email below to login to your account
+            이메일을 입력하여 계정에 로그인하세요
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -86,7 +86,7 @@ export function LoginForm({
               disabled={isLoading || isGoogleLoading}
             >
               {isGoogleLoading ? (
-                "Redirecting..."
+                "리디렉션 중..."
               ) : (
                 <>
                   <svg
@@ -99,29 +99,29 @@ export function LoginForm({
                       fill="currentColor"
                     />
                   </svg>
-                  Continue with Google
+                  Google로 계속하기
                 </>
               )}
             </Button>
 
             {/* OR 구분선 */}
             <div className="relative flex items-center">
-              <div className="flex-grow border-t border-border" />
-              <span className="mx-3 flex-shrink text-xs text-muted-foreground">
-                OR
+              <div className="border-border flex-grow border-t" />
+              <span className="text-muted-foreground mx-3 flex-shrink text-xs">
+                또는
               </span>
-              <div className="flex-grow border-t border-border" />
+              <div className="border-border flex-grow border-t" />
             </div>
 
             {/* 이메일/비밀번호 폼 */}
             <form onSubmit={handleLogin}>
               <div className="flex flex-col gap-6">
                 <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">이메일</Label>
                   <Input
                     id="email"
                     type="email"
-                    placeholder="m@example.com"
+                    placeholder="your-email@example.com"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -129,12 +129,12 @@ export function LoginForm({
                 </div>
                 <div className="grid gap-2">
                   <div className="flex items-center">
-                    <Label htmlFor="password">Password</Label>
+                    <Label htmlFor="password">비밀번호</Label>
                     <Link
                       href="/auth/forgot-password"
                       className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
                     >
-                      Forgot your password?
+                      비밀번호를 잊으셨나요?
                     </Link>
                   </div>
                   <Input
@@ -151,16 +151,16 @@ export function LoginForm({
                   className="w-full"
                   disabled={isLoading || isGoogleLoading}
                 >
-                  {isLoading ? "Logging in..." : "Login"}
+                  {isLoading ? "로그인 중..." : "로그인"}
                 </Button>
               </div>
               <div className="mt-4 text-center text-sm">
-                Don&apos;t have an account?{" "}
+                계정이 없으신가요?{" "}
                 <Link
                   href="/auth/sign-up"
                   className="underline underline-offset-4"
                 >
-                  Sign up
+                  회원가입
                 </Link>
               </div>
             </form>

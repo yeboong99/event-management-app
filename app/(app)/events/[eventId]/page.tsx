@@ -1,16 +1,27 @@
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
-import { Calendar, Edit, MapPin, Trash2, Users } from "lucide-react";
+import { Calendar, Edit, MapPin, Trash2, UserRound, Users } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 
 import { deleteEvent, getEventById } from "@/actions/events";
+import {
+  getParticipations,
+  getParticipationStatus,
+} from "@/actions/participations";
+import { getPosts } from "@/actions/posts";
+import { ParticipationForm } from "@/components/forms/participation-form";
 import { EventCategoryBadge } from "@/components/mobile/event-category-badge";
+import { AccessRestrictedNotice } from "@/components/shared/access-restricted-notice";
+import { CancelParticipationButton } from "@/components/shared/cancel-participation-button";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { CopyLinkButton } from "@/components/shared/copy-link-button";
+import { ParticipantList } from "@/components/shared/participant-list";
+import { PostsSection } from "@/components/shared/posts-section";
 import { ToastHandler } from "@/components/shared/toast-handler";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -22,12 +33,14 @@ import { cn } from "@/lib/utils";
 
 type PageProps = {
   params: Promise<{ eventId: string }>;
+  searchParams: Promise<{ status?: string }>;
 };
 
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ eventId: string }>;
+  searchParams?: Promise<{ status?: string }>;
 }): Promise<Metadata> {
   const { eventId } = await params;
   const supabase = await createClient();
@@ -41,9 +54,13 @@ export async function generateMetadata({
   return { title: event.title };
 }
 
-export default async function EventDetailPage({ params }: PageProps) {
-  // params는 반드시 await 필요 (Next.js 16 규칙)
+export default async function EventDetailPage({
+  params,
+  searchParams,
+}: PageProps) {
+  // params, searchParams는 반드시 await 필요 (Next.js 16 규칙)
   const { eventId } = await params;
+  const { status: statusFilter } = await searchParams;
 
   // 인증 확인
   const supabase = await createClient();
@@ -63,10 +80,40 @@ export default async function EventDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  // 권한 확인 (주최자만 접근 가능)
-  if (event.host_id !== user.id) {
-    redirect("/my-events");
-  }
+  // 주최자 여부 확인
+  const isHost = event.host_id === user.id;
+
+  // 비주최자인 경우 참여 상태 조회
+  const participation = !isHost
+    ? await getParticipationStatus(eventId, user.id)
+    : null;
+
+  // 승인 여부 판단 (주최자는 항상 false, 비주최자는 approved 상태 확인)
+  const isApproved = !isHost && participation?.status === "approved";
+
+  // 주최자인 경우 참여자 데이터 fetch (필터 포함 + 전체 카운트용)
+  const [participations, allParticipations] = isHost
+    ? await Promise.all([
+        getParticipations(eventId, statusFilter),
+        getParticipations(eventId),
+      ])
+    : [[], []];
+
+  // 승인된 참여자인 경우 승인된 참여자 목록만 fetch
+  const approvedParticipations = isApproved
+    ? await getParticipations(eventId, "approved")
+    : [];
+
+  // 콘텐츠 접근 가능 여부 (주최자 또는 승인된 참여자)
+  const canAccessContent = isHost || isApproved;
+
+  // 주최자 또는 승인된 참여자인 경우 게시물 데이터 fetch
+  const { posts, hasMore: postsHasMore } = canAccessContent
+    ? await getPosts(eventId, { limit: 5 })
+    : { posts: [], hasMore: false };
+
+  // 모든 로그인 사용자에게 탭 영역 항상 표시
+  const defaultTab = "participants";
 
   // 날짜 포맷
   const eventDate = new Date(event.event_date);
@@ -118,7 +165,7 @@ export default async function EventDetailPage({ params }: PageProps) {
       </div>
 
       {/* 본문 */}
-      <div className="flex-1 p-4">
+      <div className="flex-1 px-5 pt-6">
         {/* 카테고리 + 제목 */}
         <div className="mb-4">
           <EventCategoryBadge category={event.category} />
@@ -129,6 +176,11 @@ export default async function EventDetailPage({ params }: PageProps) {
 
         {/* 이벤트 정보 */}
         <div className="mb-6 flex flex-col gap-2">
+          {/* 주최자 */}
+          <div className="text-muted-foreground flex items-center gap-2 text-sm">
+            <UserRound className="h-4 w-4 shrink-0" />
+            <span>{event.host.name ?? "알 수 없음"}</span>
+          </div>
           <div className="text-muted-foreground flex items-center gap-2 text-sm">
             <Calendar className="h-4 w-4 shrink-0" />
             {/* 긴 날짜 텍스트 오버플로우 방지 */}
@@ -146,7 +198,8 @@ export default async function EventDetailPage({ params }: PageProps) {
               <Users className="h-4 w-4 shrink-0" />
               {/* 참여자 수 텍스트 오버플로우 방지 */}
               <span className="min-w-0 break-words">
-                최대 {event.max_participants}명
+                {event.current_participants_count}명 / 최대{" "}
+                {event.max_participants}명
               </span>
             </div>
           )}
@@ -165,70 +218,127 @@ export default async function EventDetailPage({ params }: PageProps) {
           </div>
         )}
 
-        {/* 액션 버튼 — 3개 버튼을 균등 분할하여 320px 화면에서도 정렬감 있게 배치 */}
-        <div className="mb-6 grid grid-cols-3 gap-2">
-          {/* CopyLinkButton은 className prop을 받지 않으므로 div로 너비 감싸기 */}
-          <div className="contents">
-            <CopyLinkButton url={inviteUrl} />
+        {/* 참여 신청 영역 (비주최자만 표시) */}
+        {!isHost && (
+          <div className="mb-6">
+            {!participation && <ParticipationForm eventId={eventId} />}
+            {participation?.status === "pending" && (
+              <div className="flex items-center gap-3">
+                <Badge variant="secondary">신청 대기중</Badge>
+                <CancelParticipationButton
+                  participationId={participation.id}
+                  eventId={eventId}
+                />
+              </div>
+            )}
+            {participation?.status === "approved" && (
+              <Badge variant="default">참여 승인됨</Badge>
+            )}
+            {participation?.status === "rejected" && (
+              <Badge variant="destructive">참여 거절됨</Badge>
+            )}
           </div>
-          <Link href={`/events/${eventId}/edit`} className="w-full">
-            <Button variant="outline" size="sm" className="w-full gap-2">
-              <Edit className="h-4 w-4" />
-              수정
-            </Button>
-          </Link>
-          <ConfirmDialog
-            title="이벤트 삭제"
-            description="정말 이 이벤트를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다."
-            confirmLabel="삭제"
-            variant="destructive"
-            onConfirm={handleDelete}
-            trigger={
-              <Button variant="destructive" size="sm" className="w-full gap-2">
-                <Trash2 className="h-4 w-4" />
-                삭제
-              </Button>
-            }
-          />
-        </div>
+        )}
 
-        {/* 하위 탭 (Phase 2~4에서 실제 기능 구현 예정) */}
-        <Tabs defaultValue="participants" className="w-full">
-          <TabsList className="w-full">
-            <TabsTrigger value="participants" className="flex-1">
-              참여자
-            </TabsTrigger>
-            <TabsTrigger value="announcements" className="flex-1">
-              공지댓글
-            </TabsTrigger>
-            <TabsTrigger value="carpools" className="flex-1">
-              카풀
-            </TabsTrigger>
-            <TabsTrigger value="expenses" className="flex-1">
-              정산
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value="participants" className="py-4">
-            <p className="text-muted-foreground text-center text-sm">
-              준비 중입니다
-            </p>
-          </TabsContent>
-          <TabsContent value="announcements" className="py-4">
-            <p className="text-muted-foreground text-center text-sm">
-              준비 중입니다
-            </p>
-          </TabsContent>
-          <TabsContent value="carpools" className="py-4">
-            <p className="text-muted-foreground text-center text-sm">
-              준비 중입니다
-            </p>
-          </TabsContent>
-          <TabsContent value="expenses" className="py-4">
-            <p className="text-muted-foreground text-center text-sm">
-              준비 중입니다
-            </p>
-          </TabsContent>
-        </Tabs>
+        {/* 액션 버튼 — 주최자만 표시 */}
+        {isHost && (
+          <div className="mb-6 grid grid-cols-3 gap-2">
+            {/* CopyLinkButton은 className prop을 받지 않으므로 div로 너비 감싸기 */}
+            <div className="contents">
+              <CopyLinkButton url={inviteUrl} />
+            </div>
+            <Link href={`/events/${eventId}/edit`} className="w-full">
+              <Button variant="outline" size="sm" className="w-full gap-2">
+                <Edit className="h-4 w-4" />
+                수정
+              </Button>
+            </Link>
+            <ConfirmDialog
+              title="이벤트 삭제"
+              description="정말 이 이벤트를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다."
+              confirmLabel="삭제"
+              variant="destructive"
+              onConfirm={handleDelete}
+              trigger={
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="w-full gap-2"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  삭제
+                </Button>
+              }
+            />
+          </div>
+        )}
+
+        {/* 하위 탭 — 모든 로그인 사용자에게 표시, 접근 권한에 따라 콘텐츠 제한 */}
+        <div className="mt-6">
+          <Tabs defaultValue={defaultTab} className="w-full">
+            <TabsList className="w-full">
+              <TabsTrigger value="participants">참여자</TabsTrigger>
+              <TabsTrigger value="posts">게시판</TabsTrigger>
+              <TabsTrigger value="carpool">카풀</TabsTrigger>
+              <TabsTrigger value="settlement">정산</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="participants">
+              {canAccessContent ? (
+                <Suspense fallback={<div>로딩 중...</div>}>
+                  <ParticipantList
+                    participations={
+                      isHost ? participations : approvedParticipations
+                    }
+                    eventId={eventId}
+                    totalCount={
+                      isHost
+                        ? allParticipations.length
+                        : approvedParticipations.length
+                    }
+                    isHost={isHost}
+                  />
+                </Suspense>
+              ) : (
+                <AccessRestrictedNotice />
+              )}
+            </TabsContent>
+
+            <TabsContent value="posts">
+              {canAccessContent ? (
+                <PostsSection
+                  initialPosts={posts}
+                  initialHasMore={postsHasMore}
+                  eventId={eventId}
+                  currentUserId={user.id}
+                  isHost={isHost}
+                />
+              ) : (
+                <AccessRestrictedNotice />
+              )}
+            </TabsContent>
+
+            <TabsContent value="carpool">
+              {canAccessContent ? (
+                <p className="text-muted-foreground py-8 text-center text-sm">
+                  카풀 기능은 Phase 3에서 제공됩니다.
+                </p>
+              ) : (
+                <AccessRestrictedNotice />
+              )}
+            </TabsContent>
+
+            <TabsContent value="settlement">
+              {canAccessContent ? (
+                <p className="text-muted-foreground py-8 text-center text-sm">
+                  정산 기능은 Phase 4에서 제공됩니다.
+                </p>
+              ) : (
+                <AccessRestrictedNotice />
+              )}
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
     </div>
   );
