@@ -197,7 +197,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      approve_participation: {
+        Args: { p_event_id: string; p_participation_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       carpool_request_status: "pending" | "approved" | "rejected"
