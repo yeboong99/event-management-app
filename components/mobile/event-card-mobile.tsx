@@ -1,6 +1,6 @@
 import { formatDistanceToNow, isPast } from "date-fns";
 import { ko } from "date-fns/locale";
-import { Calendar, MapPin, UserRound, Users } from "lucide-react";
+import { Calendar, Lock, MapPin, UserRound, Users } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -76,6 +76,13 @@ export function EventCardMobile({
           {isNew && (
             <div className="absolute top-2 left-2 rounded-full bg-red-500 px-2 py-0.5 text-xs font-bold text-white">
               NEW
+            </div>
+          )}
+          {/* 비공개 뱃지 */}
+          {event.is_public === false && (
+            <div className="absolute top-2 right-2 flex items-center gap-1 rounded-full bg-black/60 px-2 py-0.5 text-xs font-medium text-white">
+              <Lock className="h-3 w-3" />
+              비공개
             </div>
           )}
           {/* 카테고리 배지 */}
