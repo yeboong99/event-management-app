@@ -20,6 +20,9 @@ project-root/
 │   │   │   │   └── page.tsx      # 이벤트 생성
 │   │   │   └── [eventId]/
 │   │   │       ├── page.tsx      # 이벤트 상세 (참여자/게시판 탭 통합)
+│   │   │       ├── join/
+│   │   │       │   ├── page.tsx              # 비공개 이벤트 초대 랜딩 (?token=)
+│   │   │       │   └── event-join-content.tsx # 참여 신청 Client Component
 │   │   │       └── edit/
 │   │   │           └── page.tsx  # 이벤트 수정 (주최자만)
 │   │   ├── my-events/
@@ -226,6 +229,7 @@ app/
 │   └── events/
 │       ├── new/page.tsx         # URL: /events/new
 │       └── [eventId]/page.tsx   # URL: /events/{id}
+│           ├── join/page.tsx    # URL: /events/{id}/join?token= (비공개 초대 랜딩)
 │           └── edit/page.tsx    # URL: /events/{id}/edit
 ├── admin/              # URL: /admin — 관리자 전용 (데스크탑)
 │   ├── layout.tsx      # 관리자 레이아웃 (AdminSidebar + AdminHeader)

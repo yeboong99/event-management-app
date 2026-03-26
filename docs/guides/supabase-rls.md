@@ -1,7 +1,7 @@
 # Supabase RLS (Row Level Security) 가이드
 
 > 이 문서는 프로젝트에 적용된 모든 RLS 정책을 AI 및 개발자가 참조할 수 있도록 분석·정리한 문서입니다.
-> 마지막 갱신: 2026-03-25 (QUAL-001 반영 — posts/profiles RLS 역할 authenticated 통일 완료)
+> 마지막 갱신: 2026-03-27 (FLOW-001 반영 — get_event_by_invite_token SECURITY DEFINER 함수 추가)
 
 ---
 
@@ -203,15 +203,16 @@ $$;
 
 RLS를 우회하거나 동시성 제어가 필요한 로직은 `SECURITY DEFINER` 함수로 처리합니다.
 
-| 함수명                              | 용도                                                          | 비고                       |
-| ----------------------------------- | ------------------------------------------------------------- | -------------------------- |
-| `is_approved_participant_for_event` | RLS 정책 내 participations 재귀 조회 방지                     | SELECT 정책에서 호출       |
-| `approve_participation`             | 참여 승인 — 정원 초과 방지 (FOR UPDATE 잠금)                  | Server Action에서 RPC 호출 |
-| `approve_carpool_request`           | 탑승 승인 — 좌석 초과 방지 (FOR UPDATE 잠금)                  | Server Action에서 RPC 호출 |
-| `update_carpool_info`               | 카풀 정보 수정 — 좌석 감소 방지, driver_id/event_id 변경 차단 | Server Action에서 RPC 호출 |
-| `get_event_participant_count`       | 이벤트 참여자 수 조회 (주최자 +1 포함)                        | participations RLS 우회    |
-| `get_events_participant_counts`     | 이벤트 목록의 참여자 수 일괄 조회                             | participations RLS 우회    |
-| `handle_new_user`                   | auth.users 신규 생성 시 profiles 자동 삽입                    | 트리거 함수                |
+| 함수명                              | 용도                                                                     | 비고                            |
+| ----------------------------------- | ------------------------------------------------------------------------ | ------------------------------- |
+| `is_approved_participant_for_event` | RLS 정책 내 participations 재귀 조회 방지                                | SELECT 정책에서 호출            |
+| `get_event_by_invite_token`         | 초대 토큰으로 비공개 이벤트 조회 (RLS 우회) — invite_token 자체는 미반환 | `/events/{id}/join` 랜딩 페이지 |
+| `approve_participation`             | 참여 승인 — 정원 초과 방지 (FOR UPDATE 잠금)                             | Server Action에서 RPC 호출      |
+| `approve_carpool_request`           | 탑승 승인 — 좌석 초과 방지 (FOR UPDATE 잠금)                             | Server Action에서 RPC 호출      |
+| `update_carpool_info`               | 카풀 정보 수정 — 좌석 감소 방지, driver_id/event_id 변경 차단            | Server Action에서 RPC 호출      |
+| `get_event_participant_count`       | 이벤트 참여자 수 조회 (주최자 +1 포함)                                   | participations RLS 우회         |
+| `get_events_participant_counts`     | 이벤트 목록의 참여자 수 일괄 조회                                        | participations RLS 우회         |
+| `handle_new_user`                   | auth.users 신규 생성 시 profiles 자동 삽입                               | 트리거 함수                     |
 
 > `SECURITY DEFINER` 함수는 함수 소유자(superuser) 권한으로 실행되므로 RLS를 우회합니다.
 > 이 때문에 함수 로직 내에서 사용자 검증을 직접 수행해야 합니다.
@@ -249,7 +250,8 @@ AS $$ ... $$;
 
 ## 관련 문서
 
-- `docs/planning/PROJECT_ISSUES.md` — PERF-001(auth.uid 최적화), PERF-002(carpools 인덱스), QUAL-001(역할 일관성) 이슈 추적
+- `docs/planning/PROJECT_ISSUES.md` — PERF-001(auth.uid 최적화), PERF-002(carpools 인덱스), QUAL-001(역할 일관성), FLOW-001(비공개 이벤트 초대 흐름) 이슈 추적
 - `supabase/migrations/20260325000200_fix_rls_auth_uid_optimization.sql` — PERF-001 수정 마이그레이션
 - `supabase/migrations/20260325000100_fix_participations_rls.sql` — participations RLS 헬퍼 함수 도입
 - `supabase/migrations/20260325000700_fix_rls_role_consistency.sql` — QUAL-001: posts/profiles 역할 authenticated 통일
+- `supabase/migrations/20260326000000_add_invite_token.sql` — FLOW-001: events.invite_token 컬럼 및 get_event_by_invite_token 함수 추가

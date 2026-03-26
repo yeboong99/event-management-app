@@ -1,7 +1,7 @@
 # Supabase 데이터베이스 스키마 가이드
 
 > 이 문서는 프로젝트에 적용된 전체 DB 스키마를 AI 및 개발자가 참조할 수 있도록 정리한 문서입니다.
-> 마지막 갱신: 2026-03-25 (Phase 3 완료 + PERF-003 최적화 반영)
+> 마지막 갱신: 2026-03-27 (FLOW-001 해결 — events.invite_token 컬럼 및 get_event_by_invite_token 함수 추가)
 
 ---
 
@@ -97,13 +97,15 @@ CREATE TYPE carpool_request_status AS ENUM (
 | `max_participants` | `INTEGER`        | YES  | -                   | NULL이면 무제한                       |
 | `cover_image_url`  | `TEXT`           | YES  | -                   | -                                     |
 | `is_public`        | `BOOLEAN`        | YES  | `TRUE`              | -                                     |
+| `invite_token`     | `UUID`           |  NO  | `gen_random_uuid()` | UNIQUE                                |
 | `created_at`       | `TIMESTAMPTZ`    | YES  | `now()`             | -                                     |
 | `updated_at`       | `TIMESTAMPTZ`    | YES  | `now()`             | -                                     |
 
 **설계 노트:**
 
 - `max_participants = NULL`이면 참여 인원 무제한
-- 현재 MVP에서 `is_public`은 항상 `true` (비공개 이벤트 UI 미구현)
+- `invite_token`은 비공개 이벤트 초대 링크 생성에 사용 (`/events/{id}/join?token={token}`)
+- 비공개 이벤트 초대 흐름: 주최자가 초대 링크 복사 → 초대받은 사용자가 `/join` 랜딩 페이지 방문 → 참여 신청
 
 ---
 
@@ -210,6 +212,7 @@ CREATE TYPE carpool_request_status AS ENUM (
 
 | 인덱스명                            | 대상 테이블        | 컬럼                          | 비고                            |
 | ----------------------------------- | ------------------ | ----------------------------- | ------------------------------- |
+| `events_invite_token_idx`           | `events`           | `(invite_token)`              | 초대 토큰으로 이벤트 조회       |
 | `idx_participations_event_id`       | `participations`   | `(event_id)`                  | 이벤트별 참여 목록 조회         |
 | `idx_participations_user_id_status` | `participations`   | `(user_id, status)`           | 유저별 상태 필터 조회           |
 | `idx_posts_event_id_created`        | `posts`            | `(event_id, created_at DESC)` | 이벤트별 최신 게시물 조회       |
@@ -512,6 +515,45 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 | SECURITY DEFINER | YES                                                    |
 | 예외 코드        | `carpool_not_found`, `seats_full`, `request_not_found` |
 | 호출 위치        | Server Action (`actions/carpools.ts` 탑승 승인 처리)   |
+
+---
+
+### `get_event_by_invite_token(p_invite_token UUID)`
+
+**역할:** 초대 토큰으로 비공개 이벤트 기본 정보 조회. SECURITY DEFINER로 RLS 우회하여 비공개 이벤트도 조회 가능.
+
+```sql
+CREATE OR REPLACE FUNCTION get_event_by_invite_token(p_invite_token UUID)
+RETURNS TABLE (
+  id UUID, title TEXT, description TEXT, category event_category,
+  event_date TIMESTAMPTZ, location TEXT, max_participants INTEGER,
+  cover_image_url TEXT, host_id UUID, host_name TEXT, is_public BOOLEAN
+)
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT e.id, e.title, e.description, e.category, e.event_date,
+         e.location, e.max_participants, e.cover_image_url,
+         e.host_id, p.name AS host_name, e.is_public
+  FROM events e
+  LEFT JOIN profiles p ON p.id = e.host_id
+  WHERE e.invite_token = p_invite_token
+  LIMIT 1;
+$$;
+```
+
+| 항목             | 값                                                                    |
+| ---------------- | --------------------------------------------------------------------- |
+| 파라미터         | `p_invite_token UUID`                                                 |
+| 반환 타입        | `TABLE` (이벤트 기본 정보, `invite_token` 자체는 미포함)              |
+| SECURITY DEFINER | YES                                                                   |
+| 사용 위치        | Server Action (`actions/events.ts` → `/events/{id}/join` 랜딩 페이지) |
+
+**보안 설계:**
+
+- 반환 컬럼에 `invite_token` 자체는 포함하지 않아 토큰 재노출 방지
+- 토큰이 올바르지 않으면 빈 결과 반환 (에러 없음)
 
 ---
 
