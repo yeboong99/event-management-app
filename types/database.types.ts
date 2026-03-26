@@ -119,6 +119,7 @@ export type Database = {
           event_date: string
           host_id: string
           id: string
+          invite_token: string
           is_public: boolean | null
           location: string | null
           max_participants: number | null
@@ -133,6 +134,7 @@ export type Database = {
           event_date: string
           host_id: string
           id?: string
+          invite_token?: string
           is_public?: boolean | null
           location?: string | null
           max_participants?: number | null
@@ -147,6 +149,7 @@ export type Database = {
           event_date?: string
           host_id?: string
           id?: string
+          invite_token?: string
           is_public?: boolean | null
           location?: string | null
           max_participants?: number | null
@@ -307,6 +310,22 @@ export type Database = {
       approve_participation: {
         Args: { p_event_id: string; p_participation_id: string }
         Returns: boolean
+      }
+      get_event_by_invite_token: {
+        Args: { p_invite_token: string }
+        Returns: {
+          category: Database["public"]["Enums"]["event_category"]
+          cover_image_url: string
+          description: string
+          event_date: string
+          host_id: string
+          host_name: string
+          id: string
+          is_public: boolean
+          location: string
+          max_participants: number
+          title: string
+        }[]
       }
       get_event_participant_count: {
         Args: { p_event_id: string }

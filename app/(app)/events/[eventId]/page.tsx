@@ -128,7 +128,11 @@ export default async function EventDetailPage({
   const CategoryIcon = CATEGORY_ICONS[event.category] ?? CATEGORY_ICONS["기타"];
 
   // 초대 링크 URL
-  const inviteUrl = `${process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"}/events/${eventId}`;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  // 비공개 이벤트: 초대 토큰 기반 join URL, 공개 이벤트: 일반 상세 URL
+  const inviteUrl = event.is_public
+    ? `${siteUrl}/events/${eventId}`
+    : `${siteUrl}/events/${eventId}/join?token=${event.invite_token}`;
 
   // 이벤트 삭제 서버 액션 (Server Component 내 인라인 정의)
   const handleDelete = async () => {

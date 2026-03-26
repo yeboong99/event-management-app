@@ -23,9 +23,14 @@ import {
 
 interface ParticipationFormProps {
   eventId: string;
+  /** 참여 신청 성공 시 호출되는 콜백 (예: router.refresh()) */
+  onSuccess?: () => void;
 }
 
-export function ParticipationForm({ eventId }: ParticipationFormProps) {
+export function ParticipationForm({
+  eventId,
+  onSuccess,
+}: ParticipationFormProps) {
   const [isPending, startTransition] = useTransition();
 
   const form = useForm<ApplyParticipationInput>({
@@ -43,6 +48,8 @@ export function ParticipationForm({ eventId }: ParticipationFormProps) {
       if (result.success) {
         toast.success("참여 신청이 완료되었습니다.");
         form.reset();
+        // 성공 콜백 호출 (예: join 페이지에서 router.refresh())
+        onSuccess?.();
       } else {
         toast.error(result.error ?? "신청 중 오류가 발생했습니다.");
       }

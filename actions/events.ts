@@ -11,7 +11,26 @@ import {
 import { kstDatetimeLocalToUtc } from "@/lib/utils";
 import { eventCreateSchema, eventUpdateSchema } from "@/lib/validations/event";
 import { ActionResult } from "@/types/action";
-import { EventWithHost } from "@/types/event";
+import { EventCategory, EventWithHost } from "@/types/event";
+
+// ─────────────────────────────────────────────
+// 타입 정의
+// ─────────────────────────────────────────────
+
+/** 초대 토큰으로 조회한 비공개 이벤트 기본 정보 */
+export type EventByInviteToken = {
+  id: string;
+  title: string;
+  description: string | null;
+  category: EventCategory;
+  event_date: string;
+  location: string | null;
+  max_participants: number | null;
+  cover_image_url: string | null;
+  host_id: string;
+  host_name: string | null;
+  is_public: boolean | null;
+};
 
 // ─────────────────────────────────────────────
 // 이벤트 생성
@@ -493,4 +512,37 @@ export async function getPublicEvents(
     // approved 참여자가 없는 이벤트는 배치 RPC 결과에 row가 없으므로 기본값 1 사용
     current_participants_count: countMap.get(item.id) ?? 1,
   })) as EventWithHost[];
+}
+
+// ─────────────────────────────────────────────
+// 초대 토큰 기반 이벤트 조회
+// ─────────────────────────────────────────────
+
+/**
+ * 초대 토큰으로 비공개 이벤트 기본 정보를 조회합니다.
+ * SECURITY DEFINER RPC를 호출하므로 RLS를 우회합니다.
+ */
+export async function getEventByInviteToken(
+  token: string,
+): Promise<EventByInviteToken | null> {
+  // UUID 형식 검증 (DB 호출 전 빠른 실패)
+  const uuidRegex =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(token)) {
+    return null;
+  }
+
+  const supabase = await createClient();
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = (await (supabase.rpc as any)(
+    "get_event_by_invite_token",
+    { p_invite_token: token },
+  )) as { data: EventByInviteToken[] | null; error: unknown };
+
+  if (error || !data || data.length === 0) {
+    return null;
+  }
+
+  return data[0];
 }

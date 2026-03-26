@@ -40,7 +40,9 @@ export function LoginForm({
         password,
       });
       if (error) throw error;
-      router.push("/");
+      // 로그인 성공 후 redirectTo 파라미터가 있으면 해당 경로로, 없으면 홈으로 이동
+      const params = new URLSearchParams(window.location.search);
+      router.push(params.get("redirectTo") ?? "/");
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {

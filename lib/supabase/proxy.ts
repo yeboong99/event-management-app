@@ -57,6 +57,10 @@ export async function updateSession(request: NextRequest) {
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone();
     url.pathname = "/auth/login";
+    // 원본 경로+쿼리를 redirectTo로 전달 (원본 쿼리 파라미터 덮어쓰기)
+    url.search = new URLSearchParams({
+      redirectTo: request.nextUrl.pathname + request.nextUrl.search,
+    }).toString();
     return NextResponse.redirect(url);
   }
 
