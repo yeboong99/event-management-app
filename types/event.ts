@@ -17,6 +17,8 @@ export type EventWithHost = Database["public"]["Tables"]["events"]["Row"] & {
     avatar_url: string | null;
   };
   current_participants_count: number;
+  /** 정산 항목 총액 (관리자 페이지 전용, 기본값 0) */
+  settlement_total_amount: number;
 };
 
 // 카테고리 배열 상수

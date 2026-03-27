@@ -360,6 +360,82 @@ export async function deleteEvent(eventId: string): Promise<ActionResult> {
 }
 
 // ─────────────────────────────────────────────
+// 관리자 이벤트 삭제
+// ─────────────────────────────────────────────
+
+/**
+ * 관리자가 임의의 이벤트를 삭제합니다.
+ * host_id 검사를 생략하고 role='admin' 여부만 확인합니다.
+ */
+export async function adminDeleteEvent(eventId: string): Promise<ActionResult> {
+  const supabase = await createClient();
+
+  // 인증 확인
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return { success: false, error: "로그인이 필요합니다." };
+  }
+
+  // 관리자 role 검증 (profiles 테이블에서 확인)
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (profileError || !profile) {
+    return { success: false, error: "사용자 정보를 확인할 수 없습니다." };
+  }
+
+  if (profile.role !== "admin") {
+    return { success: false, error: "관리자 권한이 필요합니다." };
+  }
+
+  // 이벤트 조회 (커버 이미지 URL 확인용)
+  const { data: existingEvent, error: fetchError } = await supabase
+    .from("events")
+    .select("id, cover_image_url")
+    .eq("id", eventId)
+    .single();
+
+  if (fetchError || !existingEvent) {
+    return { success: false, error: "이벤트를 찾을 수 없습니다." };
+  }
+
+  // 커버 이미지 삭제 (기존 deleteEvent와 동일한 로직)
+  if (existingEvent.cover_image_url) {
+    try {
+      const filePath = existingEvent.cover_image_url.split("/event-covers/")[1];
+      await deleteEventCoverImage(filePath);
+    } catch {
+      // 스토리지 삭제 실패는 무시하고 DB 삭제 진행
+    }
+  }
+
+  // events 테이블 delete
+  const { error: deleteError } = await supabase
+    .from("events")
+    .delete()
+    .eq("id", eventId);
+
+  if (deleteError) {
+    return {
+      success: false,
+      error: deleteError.message ?? "이벤트 삭제에 실패했습니다.",
+    };
+  }
+
+  // 관리자 이벤트 목록 캐시 무효화
+  revalidatePath("/admin/events");
+
+  return { success: true };
+}
+
+// ─────────────────────────────────────────────
 // 이벤트 조회 함수
 // ─────────────────────────────────────────────
 
@@ -396,6 +472,7 @@ export async function getEventById(
   return {
     ...data,
     current_participants_count: countError ? 1 : (countData ?? 1),
+    settlement_total_amount: 0,
   } as EventWithHost;
 }
 
@@ -457,6 +534,7 @@ export async function getMyEvents(category?: string): Promise<EventWithHost[]> {
     ...item,
     // approved 참여자가 없는 이벤트는 배치 RPC 결과에 row가 없으므로 기본값 1 사용
     current_participants_count: countMap.get(item.id) ?? 1,
+    settlement_total_amount: 0,
   })) as EventWithHost[];
 }
 
@@ -511,6 +589,7 @@ export async function getPublicEvents(
     ...item,
     // approved 참여자가 없는 이벤트는 배치 RPC 결과에 row가 없으므로 기본값 1 사용
     current_participants_count: countMap.get(item.id) ?? 1,
+    settlement_total_amount: 0,
   })) as EventWithHost[];
 }
 

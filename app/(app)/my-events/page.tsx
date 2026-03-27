@@ -79,12 +79,12 @@ export default async function MyEventsPage({ searchParams }: PageProps) {
       {/* 탭 콘텐츠 */}
       {activeTab === "participating" ? (
         <ParticipatingView
-          participations={participations}
+          participations={sortParticipationsByDate(participations)}
           selectedStatus={selectedStatus}
         />
       ) : (
         <HostingView
-          events={hostingEvents}
+          events={sortEventsByDate(hostingEvents)}
           selectedCategory={selectedCategory}
         />
       )}
@@ -235,6 +235,40 @@ type HostingViewProps = {
   events: EventWithHost[];
   selectedCategory?: string;
 };
+
+// upcoming(미래) 이벤트를 상단, past(지난) 이벤트를 하단에 배치하는 정렬 함수
+function sortEventsByDate(events: EventWithHost[]): EventWithHost[] {
+  const now = new Date().toISOString();
+  return [...events].sort((a, b) => {
+    const aUpcoming = a.event_date >= now;
+    const bUpcoming = b.event_date >= now;
+    if (aUpcoming && !bUpcoming) return -1;
+    if (!aUpcoming && bUpcoming) return 1;
+    // 둘 다 upcoming: 가까운 날짜 순(오름차순)
+    if (aUpcoming && bUpcoming) return a.event_date.localeCompare(b.event_date);
+    // 둘 다 past: 최근 지난 순(내림차순)
+    return b.event_date.localeCompare(a.event_date);
+  });
+}
+
+// 참여 이벤트 날짜 기준으로 upcoming을 상단, past를 하단에 배치하는 정렬 함수
+function sortParticipationsByDate(
+  participations: ParticipationWithEvent[],
+): ParticipationWithEvent[] {
+  const now = new Date().toISOString();
+  return [...participations].sort((a, b) => {
+    const aDate = (a.events as EventWithHost | null)?.event_date ?? "";
+    const bDate = (b.events as EventWithHost | null)?.event_date ?? "";
+    const aUpcoming = aDate >= now;
+    const bUpcoming = bDate >= now;
+    if (aUpcoming && !bUpcoming) return -1;
+    if (!aUpcoming && bUpcoming) return 1;
+    // 둘 다 upcoming: 가까운 날짜 순(오름차순)
+    if (aUpcoming && bUpcoming) return aDate.localeCompare(bDate);
+    // 둘 다 past: 최근 지난 순(내림차순)
+    return bDate.localeCompare(aDate);
+  });
+}
 
 // 주최 중 뷰 — DB 데이터 연결 (카테고리 필터 지원)
 function HostingView({ events, selectedCategory }: HostingViewProps) {

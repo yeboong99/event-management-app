@@ -29,3 +29,11 @@ export function kstDatetimeLocalToUtc(datetimeLocal: string): string {
   const kstDate = new Date(`${datetimeLocal}:00+09:00`);
   return kstDate.toISOString();
 }
+
+/**
+ * 금액을 한국어 통화 형식으로 포맷팅합니다.
+ * 예: formatCurrency(12500) → "12,500원"
+ */
+export function formatCurrency(amount: number): string {
+  return amount.toLocaleString("ko-KR") + "원";
+}

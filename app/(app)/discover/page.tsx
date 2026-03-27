@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { getPublicEvents } from "@/actions/events";
 import { CategoryTabsScroll } from "@/components/mobile/category-tabs-scroll";
 import { EventCardMobile } from "@/components/mobile/event-card-mobile";
+import { type EventWithHost } from "@/types/event";
 
 export const metadata: Metadata = {
   title: "이벤트 탐색",
@@ -16,7 +17,8 @@ type PageProps = {
 export default async function DiscoverPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const selectedCategory = params.category;
-  const events = await getPublicEvents(selectedCategory);
+  const rawEvents = await getPublicEvents(selectedCategory);
+  const events = sortEventsByDate(rawEvents);
 
   return (
     <div className="flex flex-col gap-4 p-4">
@@ -63,4 +65,19 @@ export default async function DiscoverPage({ searchParams }: PageProps) {
       )}
     </div>
   );
+}
+
+// upcoming(미래) 이벤트를 상단, past(지난) 이벤트를 하단에 배치하는 정렬 함수
+function sortEventsByDate(events: EventWithHost[]): EventWithHost[] {
+  const now = new Date().toISOString();
+  return [...events].sort((a, b) => {
+    const aUpcoming = a.event_date >= now;
+    const bUpcoming = b.event_date >= now;
+    if (aUpcoming && !bUpcoming) return -1;
+    if (!aUpcoming && bUpcoming) return 1;
+    // 둘 다 upcoming: 가까운 날짜 순(오름차순)
+    if (aUpcoming && bUpcoming) return a.event_date.localeCompare(b.event_date);
+    // 둘 다 past: 최근 지난 순(내림차순)
+    return b.event_date.localeCompare(a.event_date);
+  });
 }

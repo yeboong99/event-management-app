@@ -121,6 +121,7 @@ export type Database = {
           id: string
           invite_token: string
           is_public: boolean | null
+          is_settlement_finalized: boolean
           location: string | null
           max_participants: number | null
           title: string
@@ -136,6 +137,7 @@ export type Database = {
           id?: string
           invite_token?: string
           is_public?: boolean | null
+          is_settlement_finalized?: boolean
           location?: string | null
           max_participants?: number | null
           title: string
@@ -151,6 +153,7 @@ export type Database = {
           id?: string
           invite_token?: string
           is_public?: boolean | null
+          is_settlement_finalized?: boolean
           location?: string | null
           max_participants?: number | null
           title?: string
@@ -298,6 +301,61 @@ export type Database = {
         }
         Relationships: []
       }
+      settlement_items: {
+        Row: {
+          amount: number
+          created_at: string | null
+          created_by: string | null
+          event_id: string
+          id: string
+          label: string
+          paid_by: string
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          created_by?: string | null
+          event_id: string
+          id?: string
+          label: string
+          paid_by: string
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          created_by?: string | null
+          event_id?: string
+          id?: string
+          label?: string
+          paid_by?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "settlement_items_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "settlement_items_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "settlement_items_paid_by_fkey"
+            columns: ["paid_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -311,6 +369,7 @@ export type Database = {
         Args: { p_event_id: string; p_participation_id: string }
         Returns: boolean
       }
+      get_admin_kpi_stats: { Args: never; Returns: Json }
       get_event_by_invite_token: {
         Args: { p_invite_token: string }
         Returns: {
@@ -352,6 +411,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      update_user_role: {
+        Args: { new_role: string; target_user_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       carpool_request_status: "pending" | "approved" | "rejected"
@@ -372,7 +435,10 @@ export type Database = {
 
 type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
 
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+type DefaultSchema = DatabaseWithoutInternals[Extract<
+  keyof Database,
+  "public"
+>]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends

@@ -21,6 +21,7 @@ import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { CopyLinkButton } from "@/components/shared/copy-link-button";
 import { ParticipantList } from "@/components/shared/participant-list";
 import { PostsSection } from "@/components/shared/posts-section";
+import { SettlementSection } from "@/components/shared/settlement-section";
 import { ToastHandler } from "@/components/shared/toast-handler";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -107,6 +108,16 @@ export default async function EventDetailPage({
 
   // 콘텐츠 접근 가능 여부 (주최자 또는 승인된 참여자)
   const canAccessContent = isHost || isApproved;
+
+  // 정산용 참여자 목록: 주최자 + 승인된 참여자 (추가 DB 조회 없이 기존 데이터 활용)
+  const settlementParticipants = canAccessContent
+    ? [
+        { id: event.host_id, name: event.host.name },
+        ...(isHost ? allParticipations : approvedParticipations)
+          .filter((p) => p.status === "approved")
+          .map((p) => ({ id: p.profiles.id, name: p.profiles.name })),
+      ]
+    : [];
 
   // 주최자 또는 승인된 참여자인 경우 게시물 데이터 fetch
   const { posts, hasMore: postsHasMore } = canAccessContent
@@ -336,9 +347,15 @@ export default async function EventDetailPage({
 
             <TabsContent value="settlement">
               {canAccessContent ? (
-                <p className="text-muted-foreground py-8 text-center text-sm">
-                  정산 기능은 Phase 4에서 제공됩니다.
-                </p>
+                <Suspense fallback={<div>로딩 중...</div>}>
+                  <SettlementSection
+                    eventId={eventId}
+                    currentUserId={user.id}
+                    isHost={isHost}
+                    isApproved={isApproved}
+                    participants={settlementParticipants}
+                  />
+                </Suspense>
               ) : (
                 <AccessRestrictedNotice />
               )}

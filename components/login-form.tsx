@@ -44,7 +44,13 @@ export function LoginForm({
       const params = new URLSearchParams(window.location.search);
       router.push(params.get("redirectTo") ?? "/");
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred");
+      const message =
+        error instanceof Error ? error.message : "An error occurred";
+      setError(
+        message.includes("Invalid login credentials")
+          ? "이메일 또는 비밀번호가 일치하지 않습니다. 확인 후 다시 입력해주세요."
+          : message,
+      );
     } finally {
       setIsLoading(false);
     }
@@ -139,7 +145,6 @@ export function LoginForm({
                     onChange={(e) => setPassword(e.target.value)}
                   />
                 </div>
-                {error && <p className="text-sm text-red-500">{error}</p>}
                 <Button
                   type="submit"
                   className="w-full"
@@ -147,6 +152,7 @@ export function LoginForm({
                 >
                   {isLoading ? "로그인 중..." : "로그인"}
                 </Button>
+                {error && <p className="text-sm text-red-500">{error}</p>}
               </div>
               {/* 회원가입 안내 */}
               <div className="mt-4 text-center text-sm">
