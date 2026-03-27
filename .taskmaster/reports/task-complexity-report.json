@@ -1,93 +1,141 @@
 {
   "meta": {
-    "generatedAt": "2026-03-25T05:50:28.376Z",
-    "tasksAnalyzed": 10,
-    "totalTasks": 12,
-    "analysisCount": 10,
+    "generatedAt": "2026-03-27T06:20:23.442Z",
+    "tasksAnalyzed": 16,
+    "totalTasks": 16,
+    "analysisCount": 16,
     "thresholdScore": 5,
     "projectName": "Task Master",
     "usedResearch": false
   },
   "complexityAnalysis": [
     {
-      "taskId": 57,
-      "taskTitle": "Migration — approve_carpool_request RPC 함수 구현",
-      "complexityScore": 2,
-      "recommendedSubtasks": 3,
-      "expansionPrompt": "Phase 2의 approve_participation RPC 함수(20260322000400_create_approve_participation_rpc.sql)를 참고하여 다음 서브태스크로 확장하세요: 1) carpools 테이블에 FOR UPDATE 잠금 획득 및 total_seats 조회 2) carpool_requests에서 승인된 탑승자 수 COUNT 조회 3) 좌석 초과 검증 및 status 업데이트. 각 예외 상황(carpool_not_found, seats_full, request_not_found)에 대한 RAISE EXCEPTION 처리를 포함하세요. pgbench를 이용한 동시성 테스트 시나리오도 작성하세요.",
-      "reasoning": "approve_participation RPC와 거의 동일한 구조로 참고 코드가 명확합니다. carpools 테이블 FOR UPDATE 잠금, 승인된 탑승자 수 COUNT, 좌석 초과 검증 로직이 단순하며 SQL DDL 작업만 필요합니다. 동시성 테스트가 필요하지만 기존 패턴을 재사용할 수 있어 복잡도가 낮습니다."
-    },
-    {
-      "taskId": 58,
-      "taskTitle": "TypeScript 타입 재생성 및 카풀 도메인 타입 정의",
-      "complexityScore": 2,
-      "recommendedSubtasks": 3,
-      "expansionPrompt": "types/participation.ts 파일을 참고하여 다음 서브태스크로 확장하세요: 1) npx supabase gen types 명령어로 database.types.ts 재생성 및 carpools/carpool_requests 테이블 타입 확인 2) types/carpool.ts에 기본 타입 정의 (Carpool, CarpoolInsert, CarpoolRequest, CarpoolRequestInsert, CarpoolRequestStatus) 3) 조인 타입 정의 (CarpoolWithDriver, CarpoolWithDetails, CarpoolRequestWithProfile, CarpoolRequestWithCarpool, CarpoolWithEvent). npm run type-check로 모든 타입이 올바르게 정의되었는지 검증하세요.",
-      "reasoning": "types/participation.ts와 거의 동일한 패턴으로 대부분 복사-붙여넣기 작업입니다. 자동 생성 명령어 실행 후 타입 정의만 추가하면 되며, 조인 타입 구조도 participation과 유사하여 참고 패턴이 완벽히 일치합니다. 테스트도 npm run type-check로 간단합니다."
-    },
-    {
-      "taskId": 59,
-      "taskTitle": "카풀 Zod 검증 스키마 정의",
-      "complexityScore": 2,
-      "recommendedSubtasks": 3,
-      "expansionPrompt": "lib/validations/participation.ts 파일을 참고하여 다음 서브태스크로 확장하세요: 1) registerCarpoolSchema 정의 (departurePlace, departureTime, totalSeats, description 필드, 한국어 에러 메시지) 2) requestCarpoolSchema 정의 (carpoolId, message 필드) 3) updateCarpoolRequestStatusSchema 정의 (requestId, carpoolId, status enum). 각 스키마에 대해 유효한 입력과 유효하지 않은 입력으로 safeParse 테스트를 수행하고, 한국어 에러 메시지가 올바르게 반환되는지 확인하세요.",
-      "reasoning": "lib/validations/participation.ts와 거의 동일한 구조로 단순 Zod 스키마 작성입니다. totalSeats 필드의 1~10 범위 검증이 추가되지만 참고 코드와 거의 동일하며, 명확한 검증 규칙과 한국어 에러 메시지만 작성하면 됩니다. safeParse 테스트도 단순합니다."
-    },
-    {
-      "taskId": 60,
-      "taskTitle": "Server Actions — 카풀 등록/삭제 구현",
+      "taskId": 68,
+      "taskTitle": "settlement_items 테이블 생성 및 RLS 정책 구현",
       "complexityScore": 4,
       "recommendedSubtasks": 4,
-      "expansionPrompt": "actions/participations.ts의 applyParticipation, cancelParticipation 패턴을 참고하여 다음 서브태스크로 확장하세요: 1) registerCarpool의 권한 확인 로직 구현 (주최자 OR 승인된 참여자 체크) 2) registerCarpool의 카풀 등록 처리 및 revalidatePath 3) deleteCarpool의 권한 확인 로직 구현 (드라이버 OR 주최자 체크) 4) deleteCarpool의 카풀 삭제 처리 및 revalidatePath. Zod 검증, 에러 처리, toast 메시지를 모두 포함하고, 각 권한 체크 로직을 독립적으로 테스트하세요.",
-      "reasoning": "참고 패턴이 명확하지만 권한 확인 로직이 2단계(주최자 OR 승인된 참여자)로 복잡합니다. registerCarpool은 participations와 events 테이블을 모두 조회해야 하고, deleteCarpool도 carpools와 events 두 테이블을 조회하여 드라이버 OR 주최자를 확인해야 합니다. Zod 검증과 에러 처리는 패턴 재사용 가능하지만, 권한 로직에서 실수할 여지가 있습니다."
+      "expansionPrompt": "settlement_items 테이블 생성을 다음 단계로 분해하세요: 1) 테이블 스키마 및 FK 정의 (id, event_id, paid_by, label, amount, created_at, updated_at), 2) CHECK 제약 및 인덱스 생성 (amount_positive, idx_settlement_items_event_id), 3) updated_at 트리거 설정, 4) RLS 정책 구현 (SELECT: 주최자/승인 참여자, INSERT/UPDATE/DELETE: 주최자만). 각 단계별로 테스트 검증 포함.",
+      "reasoning": "기존 카풀 테이블 마이그레이션(20260324000000_create_carpools.sql)과 유사한 패턴입니다. CHECK 제약, FK ON DELETE CASCADE, 인덱스, 트리거, RLS 정책이 모두 필요하지만 참조할 수 있는 기존 패턴이 명확합니다. updated_at 트리거는 Phase 2에서 이미 생성된 함수를 재사용하므로 추가 구현이 불필요합니다. RLS 정책은 is_approved_participant_for_event 함수를 활용하여 구현하며, 기존 participations 테이블의 RLS 패턴을 참조할 수 있습니다."
     },
     {
-      "taskId": 61,
-      "taskTitle": "Server Actions — 카풀 탑승 신청/승인/거절/취소 구현",
+      "taskId": 69,
+      "taskTitle": "TypeScript 타입 재생성 및 도메인 타입 정의",
+      "complexityScore": 2,
+      "recommendedSubtasks": 0,
+      "expansionPrompt": "N/A - 단일 단계 작업: 1) Supabase CLI로 types/database.types.ts 재생성, 2) types/settlement.ts 파일 생성 및 도메인 타입 정의 (SettlementItem, SettlementItemWithPayer, SettlementTransaction, SettlementResult). types/carpool.ts 패턴을 따라 구현.",
+      "reasoning": "매우 단순한 작업입니다. Supabase CLI 명령 한 줄 실행(`npx supabase gen types typescript`)과 types/settlement.ts 파일 생성만 필요합니다. types/carpool.ts(50줄)의 명확한 패턴을 따르면 되며, Database 타입에서 Row/Insert/Update 타입을 추출하고 조인 타입을 정의하는 표준 패턴입니다. 복잡한 비즈니스 로직이나 검증이 필요 없으며, 타입 정의만으로 구성됩니다."
+    },
+    {
+      "taskId": 70,
+      "taskTitle": "정산 Zod 스키마 정의",
+      "complexityScore": 2,
+      "recommendedSubtasks": 0,
+      "expansionPrompt": "N/A - 단일 단계 작업: lib/validations/settlement.ts 파일 생성 및 settlementItemFormSchema 정의. 3개 필드(label: 문자열 1~100자, amount: 정수 1~1억, paidBy: UUID) 검증 규칙 및 한국어 에러 메시지 작성. lib/validations/carpool.ts 패턴 참조.",
+      "reasoning": "매우 단순한 작업입니다. lib/validations/carpool.ts(56줄)의 명확한 패턴을 따르면 됩니다. 3개 필드에 대한 Zod 검증 규칙만 정의하면 되며, registerCarpoolSchema와 유사한 구조입니다. 복잡한 조건부 검증이나 의존성이 없고, 각 필드별 기본 검증(min, max, int, positive, uuid)만 필요합니다. 한국어 에러 메시지 작성도 기존 패턴을 따르면 됩니다."
+    },
+    {
+      "taskId": 71,
+      "taskTitle": "1/N 균등 정산 알고리즘 구현",
+      "complexityScore": 7,
+      "recommendedSubtasks": 6,
+      "expansionPrompt": "정산 알고리즘을 다음 단계로 구현하세요: 1) 기본 함수 구조 및 타입 정의 (ParticipantPayment, SettlementResult), 2) 총액 집계 및 참여자 수 확인, 3) Math.floor 기반 1인 균등 부담액 계산 (perPerson, remainder), 4) 각 참여자 순잔액 계산 (balance = totalPaid - perPerson), 5) 나머지 보정 로직 (debtors에게 1원씩 추가 부담) + 그리디 알고리즘으로 최소 거래 쌍 생성 (creditors/debtors 정렬 및 매칭), 6) 엣지 케이스 처리 및 테스트 (참여자 0명, totalAmount 0, 한 명만 지출, 모든 참여자 동일 지출, 나머지 발생 케이스).",
+      "reasoning": "이 작업은 Phase 4에서 가장 복잡한 알고리즘 구현입니다. Math.floor + 나머지 보정 로직은 합계 정확성을 보장하기 위해 신중한 설계가 필요하며(Math.ceil 사용 시 합계 불일치 발생), 그리디 알고리즘으로 최소 거래 쌍을 계산하는 로직은 creditors와 debtors를 절댓값 기준으로 정렬하고 매칭하는 과정이 필요합니다. 순수 함수로 구현해야 하므로 DB 의존성이 없지만, 다양한 엣지 케이스(0명, 0원, 한 명만 지출, 나머지 분배 등)를 모두 처리해야 하며, 각 케이스별 단위 테스트가 필수적입니다. 알고리즘의 정확성이 전체 정산 기능의 핵심이므로 신중한 구현과 검증이 필요합니다."
+    },
+    {
+      "taskId": 72,
+      "taskTitle": "정산 항목 조회 Server Actions 구현",
       "complexityScore": 5,
-      "recommendedSubtasks": 6,
-      "expansionPrompt": "actions/participations.ts의 패턴을 참고하여 다음 서브태스크로 확장하세요: 1) requestCarpool 구현 (본인 카풀 체크, 승인된 참여자 확인, insert, 중복 에러 처리) 2) approveCarpoolRequest 구현 (권한 확인, RPC 호출, 에러 메시지 분기) 3) rejectCarpoolRequest 구현 (권한 확인, status 업데이트) 4) cancelCarpoolRequest 구현 (본인 & pending 상태 확인, delete) 5) 모든 함수의 revalidatePath 및 에러 처리 검증 6) 통합 테스트 (중복 신청, 좌석 초과, 권한 없는 접근 등). 각 함수의 권한 확인 로직과 에러 메시지를 명확히 정의하세요.",
-      "reasoning": "actions/participations.ts와 거의 동일하지만 requestCarpool에 본인 카풀 신청 방지 로직이 추가되고, approveCarpoolRequest에서 RPC 호출 시 3가지 에러 메시지 분기(seats_full, carpool_not_found, request_not_found) 처리가 필요합니다. 중복 신청 에러(23505) 처리도 포함되며, 4개 함수의 에러 처리를 각각 검증해야 하므로 중간 복잡도입니다."
+      "recommendedSubtasks": 4,
+      "expansionPrompt": "정산 조회 Server Actions를 다음 단계로 구현하세요: 1) getSettlementItems 함수 구현 (settlement_items + profiles join으로 payer 정보 포함, created_at 정렬), 2) getSettlementResult - 참여자 목록 조회 (주최자 events.host_id + participations.status='approved'), 3) getSettlementResult - 각 참여자별 지출 총액 집계 (settlement_items에서 paid_by 기준 합산), 4) calculateSettlement 호출 및 결과 반환 (항목 없으면 null). 인증 확인 및 에러 처리 포함.",
+      "reasoning": "중간 복잡도 작업입니다. actions/carpools.ts의 getCarpoolsByEventId(528-567줄)와 getMyCarpoolRequests(598-645줄) 패턴을 참조할 수 있습니다. 2개 함수 구현이 필요하며, getSettlementItems는 단순 조회+join이지만, getSettlementResult는 주최자+승인 참여자 목록 조회, 각 참여자별 지출 총액 집계, calculateSettlement 호출 등 여러 단계가 필요합니다. Supabase 쿼리 최적화(N+1 방지)도 고려해야 하며, 참여자가 많을 경우 집계 쿼리 성능도 중요합니다. 인증 확인, 에러 처리, null 케이스 처리도 필요합니다."
     },
     {
-      "taskId": 62,
-      "taskTitle": "Server Actions — 카풀 조회 함수 구현",
+      "taskId": 79,
+      "taskTitle": "정산 항목 CUD Server Actions 구현",
       "complexityScore": 6,
-      "recommendedSubtasks": 6,
-      "expansionPrompt": "actions/participations.ts의 getParticipations, getMyParticipations 패턴을 참고하여 다음 서브태스크로 확장하세요: 1) getCarpoolsByEventId 구현 (profiles 조인, 생성일 정렬) 2) approved_count 계산 로직 구현 (Promise.all, COUNT 쿼리) 3) getCarpoolRequests 구현 (profiles 조인, status/created_at 정렬) 4) getMyCarpoolRequests 구현 (carpools + events 조인, 상태별 필터) 5) getMyCarpools 구현 (events 조인, approved_count 계산) 6) 타입 캐스팅 및 에러 처리 검증. 각 조회 함수의 조인 타입이 types/carpool.ts와 일치하는지 확인하고, 성능 최적화(N+1 쿼리 방지)를 고려하세요.",
-      "reasoning": "참고 패턴이 명확하지만 조인 구조가 복잡합니다. getCarpoolsByEventId와 getMyCarpools에서 approved_count를 Promise.all로 별도 계산하므로 N+1 쿼리 가능성이 있습니다. getMyCarpoolRequests는 3단계 조인(carpool_requests + carpools + events)이 필요하며, 4개 함수의 조인 타입이 각각 달라 타입 캐스팅 정확성이 중요합니다. 상태별 필터 로직도 포함되어 중간 이상의 복잡도입니다."
+      "recommendedSubtasks": 5,
+      "expansionPrompt": "정산 CUD Server Actions를 다음 단계로 구현하세요: 1) createSettlementItem 구현 (Zod 서버 검증, 주최자 권한 확인, paidBy 정산 대상자 검증, INSERT, revalidatePath), 2) updateSettlementItem 구현 (Zod 검증, 권한 확인, paidBy 검증, UPDATE), 3) deleteSettlementItem 구현 (권한 확인, DELETE), 4) 주최자 권한 검증 로직 구현 (events.host_id === user.id), 5) paidBy 정산 대상자 검증 로직 구현 (주최자 또는 status='approved' 참여자인지 확인). ActionResult<T> 반환 타입 사용.",
+      "reasoning": "중간~높은 복잡도 작업입니다. actions/carpools.ts의 registerCarpool(21-130줄), updateCarpool(648-710줄), deleteCarpool(133-179줄) 패턴을 참조할 수 있지만, 추가로 paidBy 정산 대상자 검증 로직이 필요합니다. 3개 CUD 함수 모두 주최자 권한 검증이 필요하며(events 테이블 조회), create/update에서는 Zod 서버 검증과 paidBy가 정산 대상자(주최자 또는 승인 참여자)인지 추가 검증해야 합니다. participations 테이블 조회로 승인 여부를 확인하는 로직이 추가되어 카풀 CUD보다 복잡합니다. revalidatePath 호출도 각 함수마다 필요합니다."
     },
     {
-      "taskId": 63,
-      "taskTitle": "컴포넌트 — 카풀 등록 폼 및 카풀 카드 구현",
+      "taskId": 73,
+      "taskTitle": "SettlementSection 및 SettlementItemForm 컴포넌트 구현",
+      "complexityScore": 5,
+      "recommendedSubtasks": 4,
+      "expansionPrompt": "정산 컴포넌트를 다음 단계로 구현하세요: 1) SettlementSection Server Component 구현 (getSettlementItems, getSettlementResult 호출, isHost/isApproved 분기 처리), 2) SettlementItemForm 기본 구조 및 필드 구현 (label TextInput, amount NumberInput, paidBy Select), 3) React Hook Form + Zod 클라이언트 검증 연동, 4) 생성/수정 모드 전환 및 Server Action 호출 (createSettlementItem/updateSettlementItem). components/shared/carpool-section.tsx 패턴 참조.",
+      "reasoning": "중간 복잡도 작업입니다. components/shared/carpool-section.tsx(81줄) 패턴을 참조할 수 있으며, Server Component와 Client Component 분리 구조를 따릅니다. SettlementSection은 데이터 페칭 및 권한 분기 처리(주최자/참여자/미승인)를 담당하고, SettlementItemForm은 React Hook Form + Zod 이중 검증, 생성/수정 모드 전환을 구현합니다. components/forms/carpool-register-form.tsx(150줄) 패턴을 참조할 수 있지만, paidBy Select 필드는 participants props를 받아 정산 대상자 목록을 표시해야 합니다. 폼 제출 성공/실패 토스트 처리도 필요합니다."
+    },
+    {
+      "taskId": 80,
+      "taskTitle": "SettlementItemList Client Component 구현",
+      "complexityScore": 4,
+      "recommendedSubtasks": 4,
+      "expansionPrompt": "SettlementItemList를 다음 단계로 구현하세요: 1) 기본 테이블/카드 UI 구조 구현 (항목명, 금액, 지출자 이름 표시), 2) formatCurrency 유틸 함수 구현 및 적용 (lib/utils.ts에 추가, 예: 12,500원), 3) 주최자 전용 수정/삭제 버튼 구현 (isHost=true 시만 표시, 삭제는 AlertDialog 확인), 4) 총 지출 합계 하단 표시 및 빈 상태 처리. components/shared/carpool-card.tsx 패턴 참조.",
+      "reasoning": "중간 복잡도 작업입니다. components/shared/carpool-card.tsx나 participant-list.tsx 패턴을 참조할 수 있습니다. 항목 목록을 테이블 또는 카드 형태로 표시하며, formatCurrency 유틸 함수는 새로 구현해야 합니다(lib/utils.ts에 추가, Intl.NumberFormat 활용). 주최자(isHost=true)일 때만 수정/삭제 버튼을 표시하며, 삭제 시 AlertDialog로 확인하고 deleteSettlementItem을 호출합니다. 수정은 SettlementItemForm을 인라인 모드로 전환하여 처리합니다. 총 지출 합계 계산 및 표시, 항목 없을 때 빈 상태 메시지도 필요합니다."
+    },
+    {
+      "taskId": 81,
+      "taskTitle": "SettlementResult 컴포넌트 및 이벤트 상세 페이지 정산 탭 연동",
       "complexityScore": 5,
       "recommendedSubtasks": 5,
-      "expansionPrompt": "components/forms/participation-form.tsx를 참고하여 다음 서브태스크로 확장하세요: 1) carpool-register-form.tsx 기본 구조 (React Hook Form, zodResolver, useTransition) 2) 폼 필드 구현 (출발지 Input, 출발 시간 datetime-local, 좌석 수 Number, 안내사항 Textarea) 및 클라이언트 검증 3) carpool-card.tsx 기본 레이아웃 (드라이버 Avatar + 이름, 출발지, 출발 시간/시간 미정 표시) 4) 좌석 현황 표시 ({approved_count}/{total_seats}석) 및 마감 배지 로직 5) children props 통합 및 description 조건부 표시. datetime-local input의 포맷 변환과 좌석 현황 계산 로직을 명확히 구현하세요.",
-      "reasoning": "participation-form.tsx 패턴을 재사용하지만 datetime-local input 포맷 변환이 필요하고, 카풀 카드에서 좌석 현황 표시(approved_count / total_seats) 로직과 마감 배지 조건 처리가 추가됩니다. 시간 미정 조건부 표시와 children props 설계도 필요하여 중간 복잡도입니다. 조건부 렌더링 분기가 다수 포함됩니다."
+      "expansionPrompt": "SettlementResult 및 탭 연동을 다음 단계로 구현하세요: 1) SettlementResult 컴포넌트 기본 구조 (result null 시 안내 메시지), 2) 결과 표시 UI 구현 (총 지출 금액, 정산 대상자 수, 1인 균등 부담액 formatCurrency 적용), 3) 최소 거래 쌍 테이블 구현 ('A → B에게 N원' 형식), 4) currentUserId 기반 현재 사용자 거래 강조 표시 (받을 돈 green, 낼 돈 destructive, 완료 중립), 5) app/(app)/events/[eventId]/page.tsx에 정산 탭 추가 및 SettlementSection 렌더링. components/shared/carpool-tabs.tsx 패턴 참조.",
+      "reasoning": "중간 복잡도 작업입니다. SettlementResult 컴포넌트는 정산 계산 결과를 시각적으로 표시하는 역할을 하며, formatCurrency를 활용한 금액 포맷팅, 최소 거래 쌍 테이블 표시, currentUserId 기반 거래 강조(시맨틱 색상 사용)가 필요합니다. 거래 쌍 테이블은 SettlementTransaction[] 배열을 순회하며 'from → to에게 amount원' 형식으로 표시하고, currentUserId가 from/to에 포함되는지 확인하여 스타일을 적용합니다. app/(app)/events/[eventId]/page.tsx 수정은 기존 카풀 탭 추가 방식(Task 73 참조)을 따르며, 탭 순서에 정산을 추가하고 SettlementSection을 렌더링합니다. 모바일 레이아웃 대응도 필요합니다."
     },
     {
-      "taskId": 67,
-      "taskTitle": "컴포넌트 — 카풀 탑승 신청 폼 및 신청 상태 표시 구현 (참여자용)",
+      "taskId": 74,
+      "taskTitle": "참여자 정산 탭 UI 구현",
       "complexityScore": 3,
-      "recommendedSubtasks": 3,
-      "expansionPrompt": "components/forms/participation-form.tsx를 참고하여 다음 서브태스크로 확장하세요: 1) carpool-request-form.tsx 기본 구조 (React Hook Form, zodResolver, 조건부 렌더링: 드라이버 본인 비노출, 이미 신청 시 CarpoolRequestStatus 전환) 2) 잔여석 체크 로직 (approvedCount >= totalSeats 시 버튼 비활성화 + 마감 Badge) 및 requestCarpool Server Action 호출 3) carpool-request-status.tsx 구현 (신청 상태 Badge + pending일 때 취소 버튼 + cancelCarpoolRequest 호출). 조건부 렌더링 분기를 명확히 정의하고, 각 상태별 UI를 독립적으로 검증하세요.",
-      "reasoning": "participation-form.tsx 패턴을 재사용하며 조건부 렌더링 분기가 명확합니다(본인 드라이버 비노출, existingRequest 전환, 잔여석 체크). carpool-request-status.tsx는 상태별 Badge와 pending 시 취소 버튼만 포함하여 단순합니다. 조건부 렌더링이 3개 분기로 나뉘지만 로직이 명확하여 낮은 복잡도입니다."
+      "recommendedSubtasks": 0,
+      "expansionPrompt": "N/A - Task 73 확장 작업: SettlementSection의 isHost=false 분기 강화. 참여자는 SettlementItemList(isHost=false, 수정/삭제 버튼 자동 숨김) + SettlementResult(currentUserId 기반 개인 결과 강조)를 표시. 미승인 참여자는 AccessRestrictedNotice 표시. Task 73에서 이미 구현된 분기 로직 활용.",
+      "reasoning": "낮은 복잡도 작업입니다. Task 73에서 SettlementSection의 isHost/isApproved 분기 처리를 이미 구현하므로, 이 작업은 기존 로직을 확장하는 것입니다. SettlementItemList는 isHost props로 수정/삭제 버튼 표시 여부를 자동 제어하므로 추가 구현이 불필요하고, SettlementResult는 currentUserId 기반 개인 결과 강조를 이미 지원합니다. components/shared/carpool-section.tsx(28-30줄)의 AccessRestrictedNotice 패턴을 참조하면 됩니다. 새로운 컴포넌트 구현 없이 기존 컴포넌트의 props 전달만으로 처리 가능합니다."
     },
     {
-      "taskId": 65,
-      "taskTitle": "이벤트 상세 페이지 — 카풀 탭 통합",
-      "complexityScore": 6,
-      "recommendedSubtasks": 6,
-      "expansionPrompt": "components/shared/posts-section.tsx와 participant-list.tsx를 참고하여 다음 서브태스크로 확장하세요: 1) carpool-section.tsx 기본 구조 (Server Component, eventId/currentUserId props) 2) 현재 사용자의 역할 확인 로직 (주최자/승인된 참여자/비승인 사용자) 3) getCarpoolsByEventId로 카풀 목록 조회 및 카풀 카드 렌더링 4) 역할별 UI 분기 처리 (드라이버→CarpoolActions, 승인된 참여자→CarpoolRequestForm or Status, 비승인→AccessRestrictedNotice) 5) 빈 상태 UI 및 카풀 등록 폼 조건부 표시 6) app/(app)/events/[eventId]/page.tsx의 카풀 탭에 CarpoolSection 통합. 각 역할별 UI가 올바르게 렌더링되는지 검증하고, revalidatePath 후 목록이 갱신되는지 확인하세요.",
-      "reasoning": "posts-section.tsx와 participant-list.tsx 패턴을 참고하지만 역할별 UI 분기가 복잡합니다(드라이버→CarpoolActions, 승인된 참여자→CarpoolRequestForm/Status, 비승인→AccessRestrictedNotice). Server Component로 조회 후 Client Component로 전달하며, 조건부 렌더링 분기가 3가지로 나뉩니다. 전체 흐름 통합과 빈 상태 UI 처리도 필요하여 중간 이상의 복잡도입니다."
+      "taskId": 75,
+      "taskTitle": "관리자 대시보드 KPI 카드 구현",
+      "complexityScore": 5,
+      "recommendedSubtasks": 5,
+      "expansionPrompt": "관리자 대시보드 KPI를 다음 단계로 구현하세요: 1) components/admin/kpi-card.tsx 재사용 가능 컴포넌트 구현 (title, value, subValue, icon props), 2) 총 이벤트 수 KPI (events COUNT + 이번 달 생성 수), 3) 총 사용자 수 KPI (profiles COUNT + 이번 달 신규 가입 수), 4) 평균 참여율 KPI (승인 참여자 수 / max_participants 평균 %), 5) 카풀 매칭률 KPI (승인된 탑승 / 전체 신청 %). app/admin/page.tsx에 4개 KPI 카드 그리드 배치.",
+      "reasoning": "중간 복잡도 작업입니다. 재사용 가능한 KPI 카드 컴포넌트를 만들고, 4개 KPI별로 Supabase 집계 쿼리를 구현해야 합니다. 총 이벤트/사용자 수는 단순 COUNT 쿼리이지만, 이번 달 필터(.gte('created_at', firstDayOfMonth))가 필요합니다. 평균 참여율은 events와 participations 테이블을 join하여 (승인 참여자 수 / max_participants) 평균을 계산해야 하며, max_participants가 NULL인 이벤트는 제외합니다. 카풀 매칭률은 carpool_requests에서 status='approved' 비율을 계산합니다. profiles 테이블의 RLS 정책이 관리자에게 모든 프로필 조회를 허용하는지 확인 필요하며, 필요 시 SECURITY DEFINER 함수나 service role key 사용을 고려해야 합니다. 그리드 레이아웃(데스크탑 4열, 태블릿 2열)과 다크 모드 대응도 필요합니다."
     },
     {
-      "taskId": 66,
-      "taskTitle": "내 카풀 목록 페이지 구현 (하단 탭 카풀)",
+      "taskId": 76,
+      "taskTitle": "관리자 대시보드 이벤트 현황 차트 및 최근 가입자 테이블 구현",
       "complexityScore": 6,
-      "recommendedSubtasks": 6,
-      "expansionPrompt": "app/(app)/my-events/page.tsx를 참고하여 다음 서브태스크로 확장하세요: 1) app/(app)/carpools/page.tsx 기본 구조 (Server Component, URL 쿼리 파라미터로 탭 관리, getMyCarpoolRequests/getMyCarpools 호출) 2) my-carpool-requests-view.tsx 기본 구조 ('use client', 카풀 신청 목록 카드) 3) 상태별 필터 구현 (전체/대기/승인/거절) 및 pending 상태 취소 버튼 4) my-carpools-driver-view.tsx 기본 구조 ('use client', 내가 등록한 카풀 목록 카드) 5) 카드 클릭 이동 (Link to /events/[eventId]) 및 각 뷰의 빈 상태 UI 6) 탭 전환 동작 검증 및 통합 테스트 (URL 쿼리 파라미터, 상태별 필터, 취소 버튼). 각 뷰 컴포넌트를 독립적으로 테스트하고, 탭 전환이 올바르게 동작하는지 확인하세요.",
-      "reasoning": "my-events/page.tsx 패턴을 참고하지만 2개 뷰 컴포넌트('use client')와 탭 전환이 필요합니다. my-carpool-requests-view에서 상태별 필터 로직(전체/대기/승인/거절)과 pending 취소 버튼이 추가되며, 카드 디자인 및 Link 이동 처리도 필요합니다. URL 쿼리 파라미터로 탭 관리와 빈 상태 UI 처리까지 포함하여 중간 이상의 복잡도입니다."
+      "recommendedSubtasks": 5,
+      "expansionPrompt": "관리자 대시보드 차트 및 테이블을 다음 단계로 구현하세요: 1) 월별 이벤트 생성 데이터 조회 (events.created_at GROUP BY 월, 최근 6개월), 2) components/admin/events-chart.tsx Client Component 구현 (Recharts BarChart, ResponsiveContainer, 시맨틱 색상), 3) 차트 데이터가 없는 월에도 0으로 표시 처리, 4) 최근 가입자 테이블 구현 (profiles에서 created_at DESC 최근 10명, 이름/이메일/가입일 표시), 5) 다크 모드 및 반응형 레이아웃 대응. app/admin/page.tsx에 배치.",
+      "reasoning": "중간~높은 복잡도 작업입니다. Recharts 라이브러리를 사용하여 월별 Bar 차트를 구현해야 하며(package.json에 이미 포함됨 확인 필요), Server Component에서 월별 이벤트 생성 수를 조회하고 Client Component에 props로 전달합니다. 월별 GROUP BY 쿼리는 PostgreSQL의 date_trunc('month', created_at) 함수를 사용하며, 최근 6개월 데이터를 조회합니다. 데이터가 없는 월에도 0으로 표시하려면 클라이언트에서 6개월 배열을 생성하고 조회 결과를 매핑해야 합니다. Recharts는 TailwindCSS 시맨틱 색상 변수(CSS 변수)를 fill/stroke에 적용해야 하며, ResponsiveContainer로 반응형 처리합니다. 최근 가입자 테이블은 profiles 조회 후 한국어 날짜 포맷(2026.03.27)으로 표시하며, name이 null인 경우 '이름 미설정' 처리가 필요합니다. 다크 모드에서 차트 색상과 텍스트가 올바르게 표시되도록 테스트해야 합니다."
+    },
+    {
+      "taskId": 77,
+      "taskTitle": "관리자 이벤트 관리 테이블 컴포넌트 구현",
+      "complexityScore": 4,
+      "recommendedSubtasks": 4,
+      "expansionPrompt": "관리자 이벤트 테이블을 다음 단계로 구현하세요: 1) EventWithHostAndCount 타입 정의 (Event + host profile + participant count), 2) components/admin/events-table.tsx Client Component 기본 구조 (테이블 컬럼: 이벤트명, 카테고리, 주최자, 일시, 참여 인원, 공개 여부), 3) app/admin/events/page.tsx Server Component에서 events + profiles join + get_events_participant_counts RPC 조회, 4) EventsTable 컴포넌트에 데이터 전달 및 빈 상태 처리. 필터/페이지네이션/삭제는 Task 82에서 추가.",
+      "reasoning": "중간 복잡도 작업입니다. 기존 관리자 페이지 구조(app/admin/page.tsx, app/admin/users/page.tsx)를 참조할 수 있으며, 이벤트 데이터 테이블을 구현합니다. events 테이블과 profiles를 join하여 주최자 이름을 조회하고(.select('*, host:profiles!host_id(id, name)')), get_events_participant_counts RPC 함수를 호출하여 참여 인원을 조회합니다(Phase 3에서 이미 구현됨). EventWithHostAndCount 타입은 로컬 또는 types/에 정의하며, 테이블 컬럼은 이벤트명(링크), 카테고리, 주최자, 일시(한국어 포맷), 참여 인원(N/M 형식, max_participants null 시 '제한 없음'), 공개 여부(Badge)를 표시합니다. 행 클릭 시 이벤트 상세 페이지 이동은 선택 사항입니다. 이 Task에서는 필터/페이지네이션/삭제 기능을 제외하고 기본 테이블만 구현합니다."
+    },
+    {
+      "taskId": 82,
+      "taskTitle": "이벤트 관리 페이지 카테고리 필터, 페이지네이션, 삭제 기능 구현",
+      "complexityScore": 5,
+      "recommendedSubtasks": 4,
+      "expansionPrompt": "이벤트 관리 페이지 기능을 다음 단계로 구현하세요: 1) 카테고리 필터 UI 및 URL searchParams 연동 (?category=생일파티&page=1, 필터 변경 시 page=1 리셋), 2) 서버 사이드 페이지네이션 구현 (한 페이지당 15개, .range(offset, offset + 14), '이전/다음' 버튼), 3) 삭제 기능 구현 (EventsTable에 삭제 버튼 추가, AlertDialog 확인, deleteEvent Server Action 호출, revalidatePath), 4) 관리자 RLS 정책 확인 및 필요 시 마이그레이션 추가 (관리자가 본인 주최 외 이벤트도 삭제 가능하도록).",
+      "reasoning": "중간 복잡도 작업입니다. URL searchParams 기반 상태 관리는 useSearchParams + useRouter를 사용하며, 카테고리 필터는 Select 또는 탭으로 구현하고 변경 시 page=1로 리셋합니다. Supabase 쿼리에 .eq('category', category) 조건을 추가하며, category='all'이면 필터를 적용하지 않습니다. 서버 사이드 페이지네이션은 offset 계산((page - 1) * 15) 후 .range()를 사용하며, totalCount로 마지막 페이지를 계산합니다. 삭제 기능은 actions/events.ts의 deleteEvent를 재사용하되, 관리자가 본인 주최 외 이벤트도 삭제 가능한지 RLS 정책을 확인해야 합니다. 기존 events DELETE 정책이 주최자만 허용한다면, 관리자 role='admin' 조건을 추가하는 마이그레이션이 필요할 수 있습니다. AlertDialog로 삭제 확인 후 revalidatePath('/admin/events') 호출도 필요합니다."
+    },
+    {
+      "taskId": 78,
+      "taskTitle": "updateUserRole Server Action 구현 및 UsersTable 기본 컴포넌트 구현",
+      "complexityScore": 6,
+      "recommendedSubtasks": 5,
+      "expansionPrompt": "사용자 역할 관리를 다음 단계로 구현하세요: 1) actions/admin.ts 파일 생성 및 updateUserRole Server Action 기본 구조, 2) 현재 사용자 admin 검증 로직 (profiles.role === 'admin' 확인), 3) 자기 자신 역할 변경 차단 로직 (targetUserId === currentUserId), 4) profiles UPDATE 권한 확인 및 RLS 정책 검토 (필요 시 SECURITY DEFINER 함수 생성 또는 service role key 사용), 5) components/admin/users-table.tsx 구현 (이름, 이메일, 역할 Select, 가입일, 주최 이벤트 수 표시, 역할 변경 시 updateUserRole 호출 및 토스트). app/admin/users/page.tsx에서 profiles + events COUNT join 조회.",
+      "reasoning": "중간~높은 복잡도 작업입니다. updateUserRole Server Action은 admin 권한 검증, 자기 자신 역할 변경 차단, profiles 테이블 UPDATE를 수행하며, RLS 정책이 중요한 고려사항입니다. 기존 profiles UPDATE 정책이 본인만 가능하면 관리자가 타인 역할을 변경할 수 없으므로, SECURITY DEFINER 함수를 생성하거나 Server Action에서 service role key를 사용해야 할 수 있습니다. UsersTable은 profiles 조회 결과를 표시하며, 역할 Select는 user/admin 선택 가능하고 변경 시 updateUserRole을 호출합니다. 현재 사용자 자신의 역할 Select는 disabled 처리해야 합니다. app/admin/users/page.tsx에서는 profiles와 events를 join하여 각 사용자가 주최한 이벤트 수(host_id 기준 COUNT)를 조회합니다. 역할 변경 성공/실패 토스트 메시지, revalidatePath('/admin/users') 호출도 필요합니다."
+    },
+    {
+      "taskId": 83,
+      "taskTitle": "사용자 관리 페이지 검색 및 페이지네이션 구현",
+      "complexityScore": 5,
+      "recommendedSubtasks": 4,
+      "expansionPrompt": "사용자 관리 페이지 검색 및 페이지네이션을 다음 단계로 구현하세요: 1) 이름/이메일 검색 입력 UI 및 디바운스 300ms 적용 (useDebounce 훅 또는 setTimeout), 2) URL searchParams 연동 (?search=키워드&page=1, useSearchParams + useRouter, 검색어 변경 시 page=1 리셋), 3) Supabase 쿼리 수정 (.or(`name.ilike.%${search}%,email.ilike.%${search}%`)), 4) 서버 사이드 페이지네이션 구현 (한 페이지당 15명, .range(offset, offset + 14), '이전/다음' 버튼, 총 사용자 수로 마지막 페이지 계산). app/admin/users/page.tsx 최종 완성.",
+      "reasoning": "중간 복잡도 작업입니다. 이름/이메일 디바운스 검색은 useDebounce 커스텀 훅을 만들거나 useEffect + setTimeout으로 구현하며, 300ms 디바운스를 적용하여 입력마다 쿼리가 실행되지 않도록 합니다. URL searchParams는 useSearchParams + useRouter로 관리하며, 검색어 변경 시 page=1로 리셋합니다. Supabase 쿼리는 .or() 메서드로 name 또는 email에 대한 부분 일치(ilike) 검색을 수행하며, 빈 검색어일 때는 필터를 적용하지 않습니다. 서버 사이드 페이지네이션은 Task 82의 이벤트 관리 페이지와 동일한 패턴(offset 계산 + .range())을 사용하며, 총 사용자 수를 조회하여 마지막 페이지를 계산합니다. 검색 + 페이지네이션 조합 동작 검증도 필요하며, app/admin/users/page.tsx에서 조건부 쿼리를 적용합니다."
     }
   ]
 }
