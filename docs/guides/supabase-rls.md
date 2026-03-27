@@ -1,7 +1,7 @@
 # Supabase RLS (Row Level Security) 가이드
 
 > 이 문서는 프로젝트에 적용된 모든 RLS 정책을 AI 및 개발자가 참조할 수 있도록 분석·정리한 문서입니다.
-> 마지막 갱신: 2026-03-27 (FLOW-001 반영 — get_event_by_invite_token SECURITY DEFINER 함수 추가)
+> 마지막 갱신: 2026-03-28 (Phase 4 완료 — admin RLS 정책 추가, settlement_items INSERT/UPDATE/DELETE 정책 수정)
 
 ---
 
@@ -17,14 +17,15 @@ Row Level Security(RLS)는 PostgreSQL의 기능으로, 테이블의 **각 행(ro
 
 ### 현재 적용 현황
 
-| 테이블             | RLS 활성화 | 정책 수 | 주요 접근 주체                       |
-| ------------------ | :--------: | :-----: | ------------------------------------ |
-| `profiles`         |     ✅     |    3    | 본인, 인증된 모든 사용자             |
-| `events`           |     ✅     |    6    | 공개(anonymous), 주최자, 승인 참여자 |
-| `participations`   |     ✅     |    4    | 본인, 주최자, 승인 참여자            |
-| `posts`            |     ✅     |    4    | 주최자, 승인 참여자                  |
-| `carpools`         |     ✅     |    4    | 주최자, 승인 참여자                  |
-| `carpool_requests` |     ✅     |    5    | 탑승자, 드라이버, 주최자             |
+| 테이블             | RLS 활성화 | 정책 수 | 주요 접근 주체                              |
+| ------------------ | :--------: | :-----: | ------------------------------------------- |
+| `profiles`         |     ✅     |    3    | 본인, 인증된 모든 사용자                    |
+| `events`           |     ✅     |    8    | 공개(anonymous), 주최자, 승인 참여자, admin |
+| `participations`   |     ✅     |    5    | 본인, 주최자, 승인 참여자, admin            |
+| `posts`            |     ✅     |    4    | 주최자, 승인 참여자                         |
+| `carpools`         |     ✅     |    4    | 주최자, 승인 참여자                         |
+| `carpool_requests` |     ✅     |    5    | 탑승자, 드라이버, 주최자                    |
+| `settlement_items` |     ✅     |    5    | 주최자, 승인 참여자, admin                  |
 
 ---
 
@@ -103,20 +104,23 @@ $$;
 
 이벤트 정보. `is_public` 플래그로 공개/비공개 구분.
 
-| 정책명                                   | 동작   | 역할       | 조건                                         |
-| ---------------------------------------- | ------ | ---------- | -------------------------------------------- |
-| `Public events are viewable by everyone` | SELECT | `{public}` | `is_public = true`                           |
-| `Host can view their private events`     | SELECT | `{public}` | `(SELECT auth.uid()) = host_id`              |
-| `승인된 참여자도 이벤트 조회 가능`       | SELECT | `{public}` | `is_approved_participant_for_event(id)`      |
-| `Authenticated users can create events`  | INSERT | `{public}` | `(SELECT auth.uid()) = host_id` (with_check) |
-| `Host can update their events`           | UPDATE | `{public}` | `(SELECT auth.uid()) = host_id`              |
-| `Host can delete their events`           | DELETE | `{public}` | `(SELECT auth.uid()) = host_id`              |
+| 정책명                                   | 동작   | 역할              | 조건                                               |
+| ---------------------------------------- | ------ | ----------------- | -------------------------------------------------- |
+| `Public events are viewable by everyone` | SELECT | `{public}`        | `is_public = true`                                 |
+| `Host can view their private events`     | SELECT | `{public}`        | `(SELECT auth.uid()) = host_id`                    |
+| `승인된 참여자도 이벤트 조회 가능`       | SELECT | `{public}`        | `is_approved_participant_for_event(id)`            |
+| `Authenticated users can create events`  | INSERT | `{public}`        | `(SELECT auth.uid()) = host_id` (with_check)       |
+| `Host can update their events`           | UPDATE | `{public}`        | `(SELECT auth.uid()) = host_id`                    |
+| `Admin can update any events`            | UPDATE | `{authenticated}` | `profiles.role = 'admin'` (admin 전용 이벤트 수정) |
+| `Host can delete their events`           | DELETE | `{public}`        | `(SELECT auth.uid()) = host_id`                    |
+| `Admin can delete any events`            | DELETE | `{authenticated}` | `profiles.role = 'admin'` (admin 전용 이벤트 삭제) |
 
 **설계 의도:**
 
 - 공개 이벤트(`is_public = true`)는 미인증 사용자도 조회 가능 → 탐색(discover) 페이지에 활용
 - 비공개 이벤트는 주최자 또는 승인된 참여자가 조회 가능
 - 이벤트 생성 시 `host_id = (SELECT auth.uid())` WITH CHECK → 타인 명의로 이벤트 생성 불가
+- admin은 모든 이벤트 수정·삭제 가능 (정산 확정 해제, 부적절한 이벤트 관리 등)
 
 ---
 
@@ -124,12 +128,13 @@ $$;
 
 이벤트 참여 신청. `status`: `pending` → `approved` / `rejected`.
 
-| 정책명             | 동작   | 역할              | 조건                                                                  |
-| ------------------ | ------ | ----------------- | --------------------------------------------------------------------- |
-| `참여자 목록 조회` | SELECT | `{authenticated}` | 본인 데이터 OR 이벤트 주최자 OR (status='approved' AND 승인된 참여자) |
-| `참여 신청`        | INSERT | `{authenticated}` | `user_id = (SELECT auth.uid())`                                       |
-| `참여 상태 변경`   | UPDATE | `{authenticated}` | 이벤트 주최자만                                                       |
-| `참여 취소`        | DELETE | `{authenticated}` | 본인의 `pending` 상태만                                               |
+| 정책명                              | 동작   | 역할              | 조건                                                                  |
+| ----------------------------------- | ------ | ----------------- | --------------------------------------------------------------------- |
+| `참여자 목록 조회`                  | SELECT | `{authenticated}` | 본인 데이터 OR 이벤트 주최자 OR (status='approved' AND 승인된 참여자) |
+| `Admin can view all participations` | SELECT | `{authenticated}` | `profiles.role = 'admin'`                                             |
+| `참여 신청`                         | INSERT | `{authenticated}` | `user_id = (SELECT auth.uid())`                                       |
+| `참여 상태 변경`                    | UPDATE | `{authenticated}` | 이벤트 주최자만                                                       |
+| `참여 취소`                         | DELETE | `{authenticated}` | 본인의 `pending` 상태만                                               |
 
 **설계 의도:**
 
@@ -137,6 +142,7 @@ $$;
 - `is_approved_participant_for_event()` 헬퍼로 재귀 RLS 순환 방지
 - 상태 변경(`approved`/`rejected`)은 주최자 전용 — 참여자는 자신의 상태를 직접 변경 불가
 - 삭제는 `pending` 상태만 가능 — 이미 승인/거절된 참여는 취소 불가
+- admin은 모든 참여 데이터 조회 가능 (통계 집계, 이벤트 관리 목적)
 
 ---
 
@@ -167,7 +173,7 @@ $$;
 | ----------- | ------ | ----------------- | --------------------------------------------------------------- |
 | `카풀 조회` | SELECT | `{authenticated}` | 이벤트 주최자 OR 승인된 참여자                                  |
 | `카풀 등록` | INSERT | `{authenticated}` | `driver_id = (SELECT auth.uid())` AND (주최자 OR 승인된 참여자) |
-| `카풀 수정` | UPDATE | `{authenticated}` | `driver_id = auth.uid() OR events.host_id = auth.uid()`         |
+| `카풀 수정` | UPDATE | `{authenticated}` | `driver_id = (SELECT auth.uid())` OR 이벤트 주최자              |
 | `카풀 삭제` | DELETE | `{authenticated}` | 드라이버 본인 OR 이벤트 주최자                                  |
 
 **설계 의도:**
@@ -199,20 +205,43 @@ $$;
 
 ---
 
+### `settlement_items`
+
+이벤트 정산 항목. 주최자가 비용 항목을 등록하고 참여자 간 정산에 활용.
+
+| 정책명                                 | 동작   | 역할              | 조건                                               |
+| -------------------------------------- | ------ | ----------------- | -------------------------------------------------- |
+| `settlement_items_select_policy`       | SELECT | `{authenticated}` | 이벤트 주최자 OR 승인된 참여자                     |
+| `settlement_items_admin_select_policy` | SELECT | `{authenticated}` | `profiles.role = 'admin'`                          |
+| `settlement_items_insert_policy`       | INSERT | `{authenticated}` | 이벤트 주최자 OR 승인된 참여자 (WITH CHECK)        |
+| `settlement_items_update_policy`       | UPDATE | `{authenticated}` | 이벤트 주최자 OR 항목 작성자(`created_by`) (USING) |
+| `settlement_items_delete_policy`       | DELETE | `{authenticated}` | 이벤트 주최자 OR 항목 작성자(`created_by`) (USING) |
+
+**설계 의도:**
+
+- SELECT: 이벤트 주최자 또는 승인된 참여자가 조회 가능 (`is_approved_participant_for_event()` 헬퍼로 재귀 RLS 방지)
+- INSERT: 정산 항목은 주최자 뿐 아니라 승인된 참여자도 등록 가능 (공동 비용 입력)
+- UPDATE/DELETE: 주최자 또는 해당 항목을 등록한 작성자(`created_by`)만 수정·삭제 가능
+- admin은 모든 이벤트의 정산 항목 조회 가능 (정산 현황 모니터링)
+
+---
+
 ## SECURITY DEFINER 함수 목록
 
 RLS를 우회하거나 동시성 제어가 필요한 로직은 `SECURITY DEFINER` 함수로 처리합니다.
 
-| 함수명                              | 용도                                                                     | 비고                            |
-| ----------------------------------- | ------------------------------------------------------------------------ | ------------------------------- |
-| `is_approved_participant_for_event` | RLS 정책 내 participations 재귀 조회 방지                                | SELECT 정책에서 호출            |
-| `get_event_by_invite_token`         | 초대 토큰으로 비공개 이벤트 조회 (RLS 우회) — invite_token 자체는 미반환 | `/events/{id}/join` 랜딩 페이지 |
-| `approve_participation`             | 참여 승인 — 정원 초과 방지 (FOR UPDATE 잠금)                             | Server Action에서 RPC 호출      |
-| `approve_carpool_request`           | 탑승 승인 — 좌석 초과 방지 (FOR UPDATE 잠금)                             | Server Action에서 RPC 호출      |
-| `update_carpool_info`               | 카풀 정보 수정 — 좌석 감소 방지, driver_id/event_id 변경 차단            | Server Action에서 RPC 호출      |
-| `get_event_participant_count`       | 이벤트 참여자 수 조회 (주최자 +1 포함)                                   | participations RLS 우회         |
-| `get_events_participant_counts`     | 이벤트 목록의 참여자 수 일괄 조회                                        | participations RLS 우회         |
-| `handle_new_user`                   | auth.users 신규 생성 시 profiles 자동 삽입                               | 트리거 함수                     |
+| 함수명                              | 용도                                                                     | 비고                                 |
+| ----------------------------------- | ------------------------------------------------------------------------ | ------------------------------------ |
+| `is_approved_participant_for_event` | RLS 정책 내 participations 재귀 조회 방지                                | SELECT 정책에서 호출                 |
+| `get_event_by_invite_token`         | 초대 토큰으로 비공개 이벤트 조회 (RLS 우회) — invite_token 자체는 미반환 | `/events/{id}/join` 랜딩 페이지      |
+| `approve_participation`             | 참여 승인 — 정원 초과 방지 (FOR UPDATE 잠금)                             | Server Action에서 RPC 호출           |
+| `approve_carpool_request`           | 탑승 승인 — 좌석 초과 방지 (FOR UPDATE 잠금)                             | Server Action에서 RPC 호출           |
+| `update_carpool_info`               | 카풀 정보 수정 — 좌석 감소 방지, driver_id/event_id 변경 차단            | Server Action에서 RPC 호출           |
+| `get_event_participant_count`       | 이벤트 참여자 수 조회 (주최자 +1 포함)                                   | participations RLS 우회              |
+| `get_events_participant_counts`     | 이벤트 목록의 참여자 수 일괄 조회                                        | participations RLS 우회              |
+| `get_admin_kpi_stats`               | 관리자 대시보드 KPI 집계 — admin 역할 검증 포함                          | 비관리자 호출 시 `permission_denied` |
+| `update_user_role`                  | admin이 사용자 역할 변경 — 본인 변경 차단                                | 비관리자 호출 시 `unauthorized`      |
+| `handle_new_user`                   | auth.users 신규 생성 시 profiles 자동 삽입                               | 트리거 함수                          |
 
 > `SECURITY DEFINER` 함수는 함수 소유자(superuser) 권한으로 실행되므로 RLS를 우회합니다.
 > 이 때문에 함수 로직 내에서 사용자 검증을 직접 수행해야 합니다.
@@ -255,3 +284,10 @@ AS $$ ... $$;
 - `supabase/migrations/20260325000100_fix_participations_rls.sql` — participations RLS 헬퍼 함수 도입
 - `supabase/migrations/20260325000700_fix_rls_role_consistency.sql` — QUAL-001: posts/profiles 역할 authenticated 통일
 - `supabase/migrations/20260326000000_add_invite_token.sql` — FLOW-001: events.invite_token 컬럼 및 get_event_by_invite_token 함수 추가
+- `supabase/migrations/20260327000000_create_settlement_items.sql` — settlement_items 테이블 생성 및 RLS 정책 추가
+- `supabase/migrations/20260327000200_add_admin_delete_events_policy.sql` — admin 이벤트 삭제 정책
+- `supabase/migrations/20260327000200_create_update_user_role_fn.sql` — update_user_role() 함수
+- `supabase/migrations/20260327000300_add_admin_select_participations_policy.sql` — admin 참여 데이터 조회 정책
+- `supabase/migrations/20260327000500_add_settlement_items_created_by.sql` — settlement_items.created_by 컬럼 추가 및 UPDATE/DELETE 정책 재정의
+- `supabase/migrations/20260327000700_add_settlement_items_admin_select_policy.sql` — admin 정산 항목 조회 정책
+- `supabase/migrations/20260327000800_add_admin_update_events_policy.sql` — admin 이벤트 수정 정책

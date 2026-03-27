@@ -374,67 +374,67 @@
 
 #### Tasks
 
-- [ ] **[TASK-039]** Migration 006 — settlement_items 테이블 + RLS + 인덱스
+- [x] **[TASK-039]** Migration 006 — settlement_items 테이블 + RLS + 인덱스
   - 파일: Supabase 마이그레이션 SQL
   - 예상 시간: 1.5h
   - 의존성: TASK-022
   - 완료 기준: settlement_items 테이블 생성, `settlement_items(event_id)` 인덱스, RLS 정책, `event_id` FK `ON DELETE CASCADE`
 
-- [ ] **[TASK-040]** TypeScript 타입 재생성 (settlement_items)
+- [x] **[TASK-040]** TypeScript 타입 재생성 (settlement_items)
   - 파일: `types/database.types.ts`
   - 예상 시간: 30m
   - 의존성: TASK-039
 
-- [ ] **[TASK-041]** 정산 알고리즘 구현 (calculateSettlement)
+- [x] **[TASK-041]** 정산 알고리즘 구현 (calculateSettlement)
   - 파일: `lib/settlement.ts`
   - 예상 시간: 3h
   - 의존성: TASK-040
   - 완료 기준: PRD 명세 기반 5단계 그리디 알고리즘 구현, `Math.floor` + 나머지 보정 처리 (올림 오차 방지), 단위 테스트 작성
   - 주의: `Math.ceil` 사용 시 총 부담액 > 실제 지출 문제 발생. `Math.floor` 사용 후 나머지를 첫 번째 debtor에게 할당하는 보정 로직 포함
 
-- [ ] **[TASK-042]** Server Actions — 정산 관리 구현
+- [x] **[TASK-042]** Server Actions — 정산 관리 구현
   - 파일: `actions/settlements.ts`
   - 예상 시간: 3h
   - 의존성: TASK-041
   - 완료 기준: `createSettlementItem`, `updateSettlementItem`, `deleteSettlementItem`, `calculateSettlement` (lib 함수 호출) 구현
 
-- [ ] **[TASK-043]** 정산 관리 페이지 (주최자)
+- [x] **[TASK-043]** 정산 관리 페이지 (주최자)
   - 파일: `app/(host)/events/[eventId]/settlement/page.tsx`, `components/shared/settlement-table.tsx`, `components/shared/settlement-summary.tsx`, `components/forms/settlement-item-form.tsx`
   - 예상 시간: 4h
   - 의존성: TASK-042
   - 완료 기준: 지출 항목 목록 (추가/수정/삭제), 총 합계 표시, 정산 계산하기 버튼, 1인 균등 부담액 + 최소 거래 쌍 결과 테이블 표시
 
-- [ ] **[TASK-044]** 정산 현황 페이지 (참여자)
+- [x] **[TASK-044]** 정산 현황 페이지 (참여자)
   - 파일: `app/(participant)/events/[eventId]/settlement/page.tsx`
   - 예상 시간: 2h
   - 의존성: TASK-042
   - 완료 기준: 전체 지출 항목 목록 (읽기 전용), 1인 부담액, 내 정산 결과 (받을 돈/낼 돈/없음), 최소 거래 쌍 목록
 
-- [ ] **[TASK-045]** 관리자 대시보드 — KPI 카드
+- [x] **[TASK-045]** 관리자 대시보드 — KPI 카드
   - 파일: `app/admin/page.tsx`, `components/admin/kpi-card.tsx`
   - 예상 시간: 3h
   - 의존성: TASK-010, TASK-005
   - 완료 기준: 4개 KPI 카드 표시 (총 이벤트 수/이번 달 생성, 총 사용자 수/이번 달 신규, 평균 참여율, 카풀 매칭률), DB 집계 쿼리로 실제 데이터 반영
 
-- [ ] **[TASK-046]** 관리자 대시보드 — 이벤트 현황 차트
+- [x] **[TASK-046]** 관리자 대시보드 — 이벤트 현황 차트
   - 파일: `components/admin/events-chart.tsx`
   - 예상 시간: 2h
   - 의존성: TASK-045
   - 완료 기준: recharts Bar 차트로 월별 이벤트 생성 현황 표시 (Client Component)
 
-- [ ] **[TASK-047]** 관리자 대시보드 — 최근 가입자 테이블
+- [x] **[TASK-047]** 관리자 대시보드 — 최근 가입자 테이블
   - 파일: `app/admin/page.tsx` (통합)
   - 예상 시간: 1h
   - 의존성: TASK-045
   - 완료 기준: 최근 가입자 5~10명 테이블 (이름, 이메일, 가입일)
 
-- [ ] **[TASK-048]** 관리자 이벤트 관리 페이지
+- [x] **[TASK-048]** 관리자 이벤트 관리 페이지
   - 파일: `app/admin/events/page.tsx`, `components/admin/events-table.tsx`
   - 예상 시간: 3h
   - 의존성: TASK-045
   - 완료 기준: 전체 이벤트 데이터 테이블, 카테고리 필터, 삭제 버튼 (확인 다이얼로그), 페이지네이션
 
-- [ ] **[TASK-049]** 관리자 사용자 관리 페이지
+- [x] **[TASK-049]** 관리자 사용자 관리 페이지
   - 파일: `app/admin/users/page.tsx`, `components/admin/users-table.tsx`, `actions/admin.ts`
   - 예상 시간: 3h
   - 의존성: TASK-045

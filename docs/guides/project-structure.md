@@ -152,7 +152,8 @@ project-root/
 │   ├── event.ts                  # 이벤트 타입 + EventWithHost
 │   ├── participation.ts          # 참여 타입 + 조인 타입
 │   ├── post.ts                   # 게시물 타입 + PostWithAuthor
-│   └── carpool.ts                # 카풀 타입 + CarpoolWithDriver 등
+│   ├── carpool.ts                # 카풀 타입 + CarpoolWithDriver 등
+│   └── settlement.ts             # 정산 타입 + SettlementItemWithPayer 등
 │
 ├── supabase/                     # Supabase 로컬 개발 설정
 │   ├── migrations/               # DB 마이그레이션 SQL 파일
