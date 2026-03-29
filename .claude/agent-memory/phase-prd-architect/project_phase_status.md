@@ -18,9 +18,15 @@ Phase 3 (카풀 기능): 완료 — TASK-032~038 모두 완료. carpools/carpool
 
 - Phase 3 PRD: 2026-03-24에 `docs/planning/Phase_3.md`로 생성.
 
-Phase 4 (정산 + 관리자 대시보드): 미착수 — TASK-039~049.
+Phase 4 (정산 + 관리자 대시보드): 완료 — TASK-039~049 모두 완료. settlement_items 테이블, 1/N 정산 알고리즘, 정산 CRUD, 관리자 KPI/차트/가입자 테이블, 이벤트/사용자 관리.
 
-- Phase 4 PRD: 2026-03-27에 `docs/planning/Phase_4.md`로 생성. 12개 Task (정산 트랙 7개: DB 마이그레이션 1개, 타입 1개, 알고리즘 1개, Zod 스키마 1개, Server Actions 1개, UI 2개 / 관리자 트랙 5개: KPI 카드, 차트, 최근 가입자, 이벤트 관리, 사용자 관리). 정산과 관리자 트랙은 병렬 진행 가능.
+- Phase 4 PRD: 2026-03-27에 `docs/planning/Phase_4.md`로 생성.
+
+Phase 5 (프로필 + UX + 보안): 미착수 — TASK-050~058.
+
+- Phase 5 PRD: 2026-03-28에 `docs/planning/Phase_5.md`로 생성. 11개 Task (프로필 트랙 5개: 스키마/타입/Storage → Server Actions → 페이지 UI → 비밀번호 변경 → 회원 탈퇴 / UX 트랙 3개: 빈 상태, 로딩 스켈레톤, 에러 바운더리 / 보안 트랙 3개: 반응형 검증, 주최자 접근제어, 참여자 접근제어). 프로필 트랙은 순차, UX 트랙은 독립 병렬 가능.
+
+Phase 6 (성능 최적화 + 런칭 준비): 미착수 — TASK-059~064.
 
 **Why:** TaskMaster AI `parse-prd` 명령에 최적화된 형식으로 Phase별 PRD를 생성하여 체계적 태스크 관리를 수행하기 위함.
-**How to apply:** 다음 Phase PRD 생성 시 Phase 4 완료 상태를 확인할 것. ROADMAP의 (host)/(participant) 경로를 실제 (app) 통합 구조로 변환하는 것 잊지 말 것. update_updated_at_column() 트리거 함수와 is_approved_participant_for_event() 함수는 이미 존재하므로 재생성하지 않도록 주의. 관리자 페이지의 RLS 우회 이슈(admin이 모든 데이터에 접근)에 대한 해결책 확인 필요.
+**How to apply:** 다음 Phase PRD 생성 시 Phase 5 완료 상태를 확인할 것. ROADMAP의 (host)/(participant) 경로를 실제 (app) 통합 구조로 변환하는 것 잊지 말 것. 회원 탈퇴 기능에 SUPABASE_SERVICE_ROLE_KEY 환경 변수 필요. avatars 버킷 Supabase 대시보드에서 사전 생성 필요.
