@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { getPublicEvents } from "@/actions/events";
 import { CategoryTabsScroll } from "@/components/mobile/category-tabs-scroll";
 import { EventCardMobile } from "@/components/mobile/event-card-mobile";
+import { EmptyState } from "@/components/shared/empty-state";
 import { type EventWithHost } from "@/types/event";
 
 export const metadata: Metadata = {
@@ -51,17 +52,15 @@ export default async function DiscoverPage({ searchParams }: PageProps) {
           </div>
         </>
       ) : (
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <Calendar className="text-muted-foreground/40 mb-4 h-16 w-16" />
-          <h3 className="text-foreground text-lg font-semibold">
-            {selectedCategory
+        <EmptyState
+          icon={Calendar}
+          title={
+            selectedCategory
               ? `${selectedCategory} 이벤트가 없습니다`
-              : "아직 공개된 이벤트가 없습니다"}
-          </h3>
-          <p className="text-muted-foreground mt-2 text-sm">
-            나중에 다시 확인해보세요!
-          </p>
-        </div>
+              : "아직 공개된 이벤트가 없습니다"
+          }
+          description="나중에 다시 확인해보세요!"
+        />
       )}
     </div>
   );

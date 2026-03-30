@@ -7,6 +7,7 @@ import { getMyParticipations } from "@/actions/participations";
 import { CategoryTabsScroll } from "@/components/mobile/category-tabs-scroll";
 import { EventCardMobile } from "@/components/mobile/event-card-mobile";
 import { CancelParticipationButton } from "@/components/shared/cancel-participation-button";
+import { EmptyState } from "@/components/shared/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -211,21 +212,20 @@ function ParticipatingView({
         </div>
       ) : (
         /* 빈 상태 */
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <Calendar className="text-muted-foreground/40 mb-4 h-16 w-16" />
-          <h2 className="text-foreground text-lg font-semibold">
-            {emptyStateMessage.title}
-          </h2>
-          <p className="text-muted-foreground mt-2 text-sm">
-            {emptyStateMessage.desc}
-          </p>
-          <Link href="/events">
-            <Button variant="outline" className="mt-4">
-              <Compass className="mr-2 h-4 w-4" />
-              이벤트 탐색하기
-            </Button>
-          </Link>
-        </div>
+        <EmptyState
+          icon={Calendar}
+          title={emptyStateMessage.title}
+          description={emptyStateMessage.desc}
+          className="py-16"
+          action={
+            <Link href="/events">
+              <Button variant="outline">
+                <Compass className="mr-2 h-4 w-4" />
+                이벤트 탐색하기
+              </Button>
+            </Link>
+          }
+        />
       )}
     </section>
   );
@@ -308,21 +308,19 @@ function HostingView({ events, selectedCategory }: HostingViewProps) {
         </div>
       ) : (
         /* 빈 상태 */
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <Calendar className="text-muted-foreground/40 mb-4 h-16 w-16" />
-          <h2 className="text-foreground text-lg font-semibold">
-            아직 만든 이벤트가 없습니다
-          </h2>
-          <p className="text-muted-foreground mt-2 text-sm">
-            새로운 이벤트를 만들어보세요!
-          </p>
-          <Link href="/events/new">
-            <Button className="mt-4">
-              <Plus className="mr-2 h-4 w-4" />
-              이벤트 만들기
-            </Button>
-          </Link>
-        </div>
+        <EmptyState
+          icon={Calendar}
+          title="아직 만든 이벤트가 없습니다"
+          description="새로운 이벤트를 만들어보세요!"
+          action={
+            <Link href="/events/new">
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                이벤트 만들기
+              </Button>
+            </Link>
+          }
+        />
       )}
     </section>
   );

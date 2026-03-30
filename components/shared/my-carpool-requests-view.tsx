@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { CarpoolRequestStatus } from "@/components/shared/carpool-request-status";
+import { EmptyState } from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -75,22 +76,15 @@ export function MyCarpoolRequestsView({
       {/* 카풀 신청 목록 또는 빈 상태 */}
       {requests.length === 0 ? (
         /* 전체 목록이 비어있는 경우 */
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <Car className="text-muted-foreground/40 mb-4 h-16 w-16" />
-          <h2 className="text-foreground text-lg font-semibold">
-            탑승 신청한 카풀이 없습니다
-          </h2>
-          <p className="text-muted-foreground mt-2 text-sm">
-            이벤트 페이지에서 카풀 탑승을 신청해보세요.
-          </p>
-        </div>
+        <EmptyState
+          icon={Car}
+          title="탑승 신청한 카풀이 없습니다"
+          description="이벤트 페이지에서 카풀 탑승을 신청해보세요."
+          className="py-16"
+        />
       ) : filteredRequests.length === 0 ? (
         /* 필터 적용 후 결과 없는 경우 */
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <p className="text-muted-foreground text-sm">
-            해당 상태의 신청이 없습니다
-          </p>
-        </div>
+        <EmptyState title="해당 상태의 신청이 없습니다" />
       ) : (
         /* 카풀 신청 카드 목록 */
         <div className="flex flex-col gap-3">

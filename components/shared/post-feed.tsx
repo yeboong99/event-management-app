@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { loadMorePosts } from "@/actions/posts";
+import { EmptyState } from "@/components/shared/empty-state";
 import { PostItem } from "@/components/shared/post-item";
 import { Button } from "@/components/ui/button";
 import type { PostWithAuthor } from "@/types/post";
@@ -46,14 +47,10 @@ export function PostFeedPaginated({
   // 빈 상태 UI
   if (posts.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-2 py-12 text-center">
-        <p className="text-muted-foreground">아직 게시물이 없습니다.</p>
-        {isHost && (
-          <p className="text-muted-foreground text-sm">
-            첫 번째 공지를 작성해보세요.
-          </p>
-        )}
-      </div>
+      <EmptyState
+        title="아직 게시물이 없습니다."
+        description={isHost ? "첫 번째 공지를 작성해보세요." : undefined}
+      />
     );
   }
 

@@ -12,6 +12,7 @@ import {
 } from "@/components/shared/carpool-actions";
 import { CarpoolCard } from "@/components/shared/carpool-card";
 import { CarpoolRegisterToggle } from "@/components/shared/carpool-register-toggle";
+import { EmptyState } from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type {
@@ -59,19 +60,19 @@ export function CarpoolTabs({
   const renderCarpoolList = (list: CarpoolWithDetails[], isMineTab = false) => {
     if (list.length === 0) {
       return (
-        <div className="py-12 text-center">
-          <Car className="text-muted-foreground/50 mx-auto mb-3 h-12 w-12" />
-          <p className="text-muted-foreground text-sm">
-            {isMineTab
+        <EmptyState
+          icon={Car}
+          title={
+            isMineTab
               ? "등록하거나 신청한 카풀이 없습니다."
-              : "등록된 카풀이 없습니다."}
-          </p>
-          {!isMineTab && canRegister && (
-            <p className="text-muted-foreground mt-1 text-xs">
-              위 버튼을 눌러 카풀을 등록해보세요.
-            </p>
-          )}
-        </div>
+              : "등록된 카풀이 없습니다."
+          }
+          description={
+            !isMineTab && canRegister
+              ? "위 버튼을 눌러 카풀을 등록해보세요."
+              : undefined
+          }
+        />
       );
     }
 

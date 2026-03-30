@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { deleteSettlementItem } from "@/actions/settlements";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { EmptyState } from "@/components/shared/empty-state";
 import { SettlementItemForm } from "@/components/shared/settlement-item-form";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -81,12 +82,7 @@ export function SettlementItemList({
 
       {/* 빈 상태: 항목이 하나도 없을 때 */}
       {items.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-3 py-12">
-          <Receipt className="text-muted-foreground/40 size-10" />
-          <p className="text-muted-foreground text-sm">
-            등록된 지출 항목이 없습니다.
-          </p>
-        </div>
+        <EmptyState icon={Receipt} title="등록된 지출 항목이 없습니다." />
       ) : (
         <>
           {/* 헤더 행 — sm 이상에서만 표시 */}

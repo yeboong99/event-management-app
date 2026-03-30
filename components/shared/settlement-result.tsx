@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { finalizeSettlement } from "@/actions/settlements";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { EmptyState } from "@/components/shared/empty-state";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -278,9 +279,10 @@ export function SettlementResult({
     return (
       <Card>
         <CardContent className="space-y-4 py-6">
-          <p className="text-muted-foreground text-center text-sm">
-            정산 항목을 추가하면 결과가 표시됩니다
-          </p>
+          <EmptyState
+            title="정산 항목을 추가하면 결과가 표시됩니다"
+            className="py-0"
+          />
           <FinalizeSettlementButton
             isHost={isHost}
             isFinalized={isFinalized}

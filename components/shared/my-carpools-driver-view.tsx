@@ -3,6 +3,7 @@
 import { Car, Clock, MapPin, Users } from "lucide-react";
 import Link from "next/link";
 
+import { EmptyState } from "@/components/shared/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import type { CarpoolWithEvent } from "@/types/carpool";
@@ -26,16 +27,12 @@ export function MyCarpoolsDriverView({ carpools }: MyCarpoolsDriverViewProps) {
   // 빈 상태 UI
   if (carpools.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-        <Car
-          className="text-muted-foreground/40 h-12 w-12"
-          aria-hidden="true"
-        />
-        <p className="text-foreground font-semibold">등록한 카풀이 없습니다</p>
-        <p className="text-muted-foreground text-sm">
-          이벤트에 참여 후 카풀을 등록해보세요.
-        </p>
-      </div>
+      <EmptyState
+        icon={Car}
+        title="등록한 카풀이 없습니다"
+        description="이벤트에 참여 후 카풀을 등록해보세요."
+        className="py-16"
+      />
     );
   }
 

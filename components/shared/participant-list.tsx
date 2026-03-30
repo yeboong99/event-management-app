@@ -4,6 +4,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { AttendanceToggle } from "@/components/shared/attendance-toggle";
 import { CopyLinkButton } from "@/components/shared/copy-link-button";
+import { EmptyState } from "@/components/shared/empty-state";
 import { ParticipantActions } from "@/components/shared/participant-actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -141,32 +142,22 @@ export function ParticipantList({
         ))}
 
         {/* 빈 상태 처리 */}
-        {participations.length === 0 && (
-          <div className="flex flex-col items-center gap-4 py-12">
-            {isHost ? (
-              /* 주최자용 빈 상태 */
-              totalCount === 0 ? (
-                /* 전체 참여자가 없는 경우 — 초대 링크 복사 유도 */
-                <>
-                  <p className="text-muted-foreground text-sm">
-                    아직 참여 신청이 없습니다.
-                  </p>
-                  <CopyLinkButton url={inviteUrl} />
-                </>
-              ) : (
-                /* 필터 결과가 없는 경우 */
-                <p className="text-muted-foreground text-sm">
-                  해당 상태의 참여자가 없습니다.
-                </p>
-              )
+        {participations.length === 0 &&
+          (isHost ? (
+            totalCount === 0 ? (
+              /* 주최자 — 전체 참여자 없음: 초대 링크 복사 유도 */
+              <EmptyState
+                title="아직 참여 신청이 없습니다."
+                action={<CopyLinkButton url={inviteUrl} />}
+              />
             ) : (
-              /* 참여자용 빈 상태 — 단순 안내 메시지만 표시 */
-              <p className="text-muted-foreground text-sm">
-                아직 승인된 참여자가 없습니다.
-              </p>
-            )}
-          </div>
-        )}
+              /* 주최자 — 필터 결과 없음 */
+              <EmptyState title="해당 상태의 참여자가 없습니다." />
+            )
+          ) : (
+            /* 참여자 — 단순 안내 */
+            <EmptyState title="아직 승인된 참여자가 없습니다." />
+          ))}
       </div>
     </div>
   );
